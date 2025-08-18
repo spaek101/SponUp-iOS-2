@@ -1,0 +1,781 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AB45F53C2E3AA1AD007066F8 /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = AB45F53B2E3AA1AD007066F8 /* FirebaseAI */; };
+		AB45F53E2E3AA1AD007066F8 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = AB45F53D2E3AA1AD007066F8 /* FirebaseAnalytics */; };
+		AB45F5402E3AA1AD007066F8 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AB45F53F2E3AA1AD007066F8 /* FirebaseAuth */; };
+		AB45F5422E3AA1AD007066F8 /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = AB45F5412E3AA1AD007066F8 /* FirebaseAuthCombine-Community */; };
+		AB45F5442E3AA1AD007066F8 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = AB45F5432E3AA1AD007066F8 /* FirebaseFirestore */; };
+		ABBDF9032E52528F00D5B5B0 /* SponsoredTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF9022E52528F00D5B5B0 /* SponsoredTab.swift */; };
+		ABBDF9052E52693000D5B5B0 /* SponsoredChallengesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF9042E52693000D5B5B0 /* SponsoredChallengesViewModel.swift */; };
+		ABBDF9072E52DA7500D5B5B0 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = ABBDF9062E52DA7500D5B5B0 /* FirebaseStorage */; };
+		ABD38B8B2E412C7B00CC17BD /* YTDSummaryChallenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B8A2E412C7B00CC17BD /* YTDSummaryChallenge.swift */; };
+		ABD38B8F2E41DB4300CC17BD /* ChaiLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B8E2E41DB4300CC17BD /* ChaiLauncher.swift */; };
+		ABD38B912E41DF3E00CC17BD /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B902E41DF3E00CC17BD /* ChatMessage.swift */; };
+		ABD38B932E449B8B00CC17BD /* ChallengeTitleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B922E449B8B00CC17BD /* ChallengeTitleStore.swift */; };
+		ABD38B952E449B9900CC17BD /* GameTitlesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B942E449B9900CC17BD /* GameTitlesView.swift */; };
+		ABD38B972E449BA300CC17BD /* TrainingTitlesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B962E449BA300CC17BD /* TrainingTitlesView.swift */; };
+		ABF2834F2E3AB84E0057C6E6 /* ChallengeRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF2834E2E3AB84E0057C6E6 /* ChallengeRowView.swift */; };
+		ABF283512E3ABA280057C6E6 /* HeroHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF283502E3ABA280057C6E6 /* HeroHeader.swift */; };
+		ABF283532E3ACC560057C6E6 /* WelcomeHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF283522E3ACC560057C6E6 /* WelcomeHeader.swift */; };
+		ABF283552E3BF8620057C6E6 /* HeroChallengeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF283542E3BF8610057C6E6 /* HeroChallengeCardView.swift */; };
+		ABF283572E3C887D0057C6E6 /* SponsorProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF283562E3C887D0057C6E6 /* SponsorProfileView.swift */; };
+		ABF283592E3D70800057C6E6 /* FundingCartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF283582E3D70800057C6E6 /* FundingCartView.swift */; };
+		ABF2835B2E3DEE850057C6E6 /* SponsorAthleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF2835A2E3DEE850057C6E6 /* SponsorAthleteView.swift */; };
+		ABF5CB192E34044B000D4E79 /* SponUp2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB182E34044B000D4E79 /* SponUp2App.swift */; };
+		ABF5CB1B2E340470000D4E79 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB1A2E340470000D4E79 /* Models.swift */; };
+		ABF5CB1D2E34047E000D4E79 /* MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB1C2E34047E000D4E79 /* MockData.swift */; };
+		ABF5CB1F2E34049C000D4E79 /* ViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB1E2E34049C000D4E79 /* ViewModels.swift */; };
+		ABF5CB212E3404AA000D4E79 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB202E3404AA000D4E79 /* MainTabView.swift */; };
+		ABF5CB252E3404BE000D4E79 /* LeaderboardStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB242E3404BE000D4E79 /* LeaderboardStrip.swift */; };
+		ABF5CB272E3404C7000D4E79 /* FilterChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB262E3404C7000D4E79 /* FilterChip.swift */; };
+		ABF5CB292E3404CF000D4E79 /* ChallengeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB282E3404CF000D4E79 /* ChallengeCardView.swift */; };
+		ABF5CB2B2E3404D8000D4E79 /* SuggestedChallengesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB2A2E3404D8000D4E79 /* SuggestedChallengesSection.swift */; };
+		ABF5CB2D2E3404E1000D4E79 /* ProgressToNextSkinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB2C2E3404E1000D4E79 /* ProgressToNextSkinView.swift */; };
+		ABF5CB312E3404F6000D4E79 /* MyChallengesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB302E3404F6000D4E79 /* MyChallengesView.swift */; };
+		ABF5CB332E340502000D4E79 /* WalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB322E340502000D4E79 /* WalletView.swift */; };
+		ABF5CB352E34050B000D4E79 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB342E34050B000D4E79 /* ProfileView.swift */; };
+		ABF5CB392E3548E4000D4E79 /* ScrollOffsetKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB382E3548E4000D4E79 /* ScrollOffsetKey.swift */; };
+		ABF5CB3B2E355E0B000D4E79 /* GradientBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB3A2E355E0B000D4E79 /* GradientBackground.swift */; };
+		ABF5CB3F2E357255000D4E79 /* AthleteHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB3E2E357255000D4E79 /* AthleteHomeView.swift */; };
+		ABF5CB412E3729AC000D4E79 /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB402E3729AB000D4E79 /* LeaderboardView.swift */; };
+		ABF5CB432E3814DB000D4E79 /* EventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB422E3814DB000D4E79 /* EventsView.swift */; };
+		ABF5CB452E39F200000D4E79 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB442E39F200000D4E79 /* ToastView.swift */; };
+		ABF5CB492E39FD62000D4E79 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB482E39FD62000D4E79 /* SignUpView.swift */; };
+		ABF5CB4B2E39FF6F000D4E79 /* SponsorHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB4A2E39FF6F000D4E79 /* SponsorHomeView.swift */; };
+		ABF5CB4D2E3A002E000D4E79 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF5CB4C2E3A002E000D4E79 /* SignInView.swift */; };
+		ABF5CB4F2E3A8A94000D4E79 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ABF5CB4E2E3A8A94000D4E79 /* GoogleService-Info.plist */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		ABF5CAFC2E3403FC000D4E79 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ABF5CAE32E3403F9000D4E79 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ABF5CAEA2E3403F9000D4E79;
+			remoteInfo = SponUp2.0;
+		};
+		ABF5CB062E3403FC000D4E79 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ABF5CAE32E3403F9000D4E79 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ABF5CAEA2E3403F9000D4E79;
+			remoteInfo = SponUp2.0;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		ABBDF9022E52528F00D5B5B0 /* SponsoredTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsoredTab.swift; sourceTree = "<group>"; };
+		ABBDF9042E52693000D5B5B0 /* SponsoredChallengesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsoredChallengesViewModel.swift; sourceTree = "<group>"; };
+		ABD38B8A2E412C7B00CC17BD /* YTDSummaryChallenge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YTDSummaryChallenge.swift; sourceTree = "<group>"; };
+		ABD38B8E2E41DB4300CC17BD /* ChaiLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChaiLauncher.swift; sourceTree = "<group>"; };
+		ABD38B902E41DF3E00CC17BD /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		ABD38B922E449B8B00CC17BD /* ChallengeTitleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeTitleStore.swift; sourceTree = "<group>"; };
+		ABD38B942E449B9900CC17BD /* GameTitlesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTitlesView.swift; sourceTree = "<group>"; };
+		ABD38B962E449BA300CC17BD /* TrainingTitlesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingTitlesView.swift; sourceTree = "<group>"; };
+		ABF2834E2E3AB84E0057C6E6 /* ChallengeRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeRowView.swift; sourceTree = "<group>"; };
+		ABF283502E3ABA280057C6E6 /* HeroHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroHeader.swift; sourceTree = "<group>"; };
+		ABF283522E3ACC560057C6E6 /* WelcomeHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeHeader.swift; sourceTree = "<group>"; };
+		ABF283542E3BF8610057C6E6 /* HeroChallengeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroChallengeCardView.swift; sourceTree = "<group>"; };
+		ABF283562E3C887D0057C6E6 /* SponsorProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsorProfileView.swift; sourceTree = "<group>"; };
+		ABF283582E3D70800057C6E6 /* FundingCartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundingCartView.swift; sourceTree = "<group>"; };
+		ABF2835A2E3DEE850057C6E6 /* SponsorAthleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsorAthleteView.swift; sourceTree = "<group>"; };
+		ABF5CAEB2E3403F9000D4E79 /* SponUp2.0.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SponUp2.0.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ABF5CAFB2E3403FC000D4E79 /* SponUp2.0Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SponUp2.0Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		ABF5CB052E3403FC000D4E79 /* SponUp2.0UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SponUp2.0UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		ABF5CB182E34044B000D4E79 /* SponUp2App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponUp2App.swift; sourceTree = "<group>"; };
+		ABF5CB1A2E340470000D4E79 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		ABF5CB1C2E34047E000D4E79 /* MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockData.swift; sourceTree = "<group>"; };
+		ABF5CB1E2E34049C000D4E79 /* ViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels.swift; sourceTree = "<group>"; };
+		ABF5CB202E3404AA000D4E79 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		ABF5CB242E3404BE000D4E79 /* LeaderboardStrip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardStrip.swift; sourceTree = "<group>"; };
+		ABF5CB262E3404C7000D4E79 /* FilterChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterChip.swift; sourceTree = "<group>"; };
+		ABF5CB282E3404CF000D4E79 /* ChallengeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeCardView.swift; sourceTree = "<group>"; };
+		ABF5CB2A2E3404D8000D4E79 /* SuggestedChallengesSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedChallengesSection.swift; sourceTree = "<group>"; };
+		ABF5CB2C2E3404E1000D4E79 /* ProgressToNextSkinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressToNextSkinView.swift; sourceTree = "<group>"; };
+		ABF5CB302E3404F6000D4E79 /* MyChallengesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyChallengesView.swift; sourceTree = "<group>"; };
+		ABF5CB322E340502000D4E79 /* WalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletView.swift; sourceTree = "<group>"; };
+		ABF5CB342E34050B000D4E79 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		ABF5CB382E3548E4000D4E79 /* ScrollOffsetKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollOffsetKey.swift; sourceTree = "<group>"; };
+		ABF5CB3A2E355E0B000D4E79 /* GradientBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientBackground.swift; sourceTree = "<group>"; };
+		ABF5CB3E2E357255000D4E79 /* AthleteHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AthleteHomeView.swift; sourceTree = "<group>"; };
+		ABF5CB402E3729AB000D4E79 /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
+		ABF5CB422E3814DB000D4E79 /* EventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsView.swift; sourceTree = "<group>"; };
+		ABF5CB442E39F200000D4E79 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
+		ABF5CB482E39FD62000D4E79 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
+		ABF5CB4A2E39FF6F000D4E79 /* SponsorHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsorHomeView.swift; sourceTree = "<group>"; };
+		ABF5CB4C2E3A002E000D4E79 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		ABF5CB4E2E3A8A94000D4E79 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		ABF5CAED2E3403F9000D4E79 /* SponUp2.0 */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SponUp2.0;
+			sourceTree = "<group>";
+		};
+		ABF5CAFE2E3403FC000D4E79 /* SponUp2.0Tests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SponUp2.0Tests;
+			sourceTree = "<group>";
+		};
+		ABF5CB082E3403FC000D4E79 /* SponUp2.0UITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SponUp2.0UITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		ABF5CAE82E3403F9000D4E79 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB45F53E2E3AA1AD007066F8 /* FirebaseAnalytics in Frameworks */,
+				AB45F5402E3AA1AD007066F8 /* FirebaseAuth in Frameworks */,
+				AB45F53C2E3AA1AD007066F8 /* FirebaseAI in Frameworks */,
+				AB45F5442E3AA1AD007066F8 /* FirebaseFirestore in Frameworks */,
+				AB45F5422E3AA1AD007066F8 /* FirebaseAuthCombine-Community in Frameworks */,
+				ABBDF9072E52DA7500D5B5B0 /* FirebaseStorage in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ABF5CAF82E3403FC000D4E79 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ABF5CB022E3403FC000D4E79 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		ABF5CAE22E3403F9000D4E79 = {
+			isa = PBXGroup;
+			children = (
+				ABBDF9042E52693000D5B5B0 /* SponsoredChallengesViewModel.swift */,
+				ABD38B8E2E41DB4300CC17BD /* ChaiLauncher.swift */,
+				ABD38B902E41DF3E00CC17BD /* ChatMessage.swift */,
+				ABD38B8A2E412C7B00CC17BD /* YTDSummaryChallenge.swift */,
+				ABF283582E3D70800057C6E6 /* FundingCartView.swift */,
+				ABF5CB182E34044B000D4E79 /* SponUp2App.swift */,
+				ABF5CB1A2E340470000D4E79 /* Models.swift */,
+				ABF5CB1E2E34049C000D4E79 /* ViewModels.swift */,
+				ABF5CB3A2E355E0B000D4E79 /* GradientBackground.swift */,
+				ABF5CB1C2E34047E000D4E79 /* MockData.swift */,
+				ABF283542E3BF8610057C6E6 /* HeroChallengeCardView.swift */,
+				ABF283522E3ACC560057C6E6 /* WelcomeHeader.swift */,
+				ABF2834E2E3AB84E0057C6E6 /* ChallengeRowView.swift */,
+				ABF5CB4A2E39FF6F000D4E79 /* SponsorHomeView.swift */,
+				ABF2835A2E3DEE850057C6E6 /* SponsorAthleteView.swift */,
+				ABF283562E3C887D0057C6E6 /* SponsorProfileView.swift */,
+				ABF5CB4C2E3A002E000D4E79 /* SignInView.swift */,
+				ABF5CB482E39FD62000D4E79 /* SignUpView.swift */,
+				ABF5CAED2E3403F9000D4E79 /* SponUp2.0 */,
+				ABF5CAFE2E3403FC000D4E79 /* SponUp2.0Tests */,
+				ABF5CB082E3403FC000D4E79 /* SponUp2.0UITests */,
+				ABF5CAEC2E3403F9000D4E79 /* Products */,
+				ABF5CB3E2E357255000D4E79 /* AthleteHomeView.swift */,
+				ABBDF9022E52528F00D5B5B0 /* SponsoredTab.swift */,
+				ABD38B922E449B8B00CC17BD /* ChallengeTitleStore.swift */,
+				ABD38B942E449B9900CC17BD /* GameTitlesView.swift */,
+				ABD38B962E449BA300CC17BD /* TrainingTitlesView.swift */,
+				ABF283502E3ABA280057C6E6 /* HeroHeader.swift */,
+				ABF5CB402E3729AB000D4E79 /* LeaderboardView.swift */,
+				ABF5CB242E3404BE000D4E79 /* LeaderboardStrip.swift */,
+				ABF5CB302E3404F6000D4E79 /* MyChallengesView.swift */,
+				ABF5CB422E3814DB000D4E79 /* EventsView.swift */,
+				ABF5CB322E340502000D4E79 /* WalletView.swift */,
+				ABF5CB342E34050B000D4E79 /* ProfileView.swift */,
+				ABF5CB202E3404AA000D4E79 /* MainTabView.swift */,
+				ABF5CB442E39F200000D4E79 /* ToastView.swift */,
+				ABF5CB382E3548E4000D4E79 /* ScrollOffsetKey.swift */,
+				ABF5CB262E3404C7000D4E79 /* FilterChip.swift */,
+				ABF5CB282E3404CF000D4E79 /* ChallengeCardView.swift */,
+				ABF5CB2A2E3404D8000D4E79 /* SuggestedChallengesSection.swift */,
+				ABF5CB2C2E3404E1000D4E79 /* ProgressToNextSkinView.swift */,
+				ABF5CB4E2E3A8A94000D4E79 /* GoogleService-Info.plist */,
+			);
+			sourceTree = "<group>";
+		};
+		ABF5CAEC2E3403F9000D4E79 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				ABF5CAEB2E3403F9000D4E79 /* SponUp2.0.app */,
+				ABF5CAFB2E3403FC000D4E79 /* SponUp2.0Tests.xctest */,
+				ABF5CB052E3403FC000D4E79 /* SponUp2.0UITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		ABF5CAEA2E3403F9000D4E79 /* SponUp2.0 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ABF5CB0F2E3403FC000D4E79 /* Build configuration list for PBXNativeTarget "SponUp2.0" */;
+			buildPhases = (
+				ABF5CAE72E3403F9000D4E79 /* Sources */,
+				ABF5CAE82E3403F9000D4E79 /* Frameworks */,
+				ABF5CAE92E3403F9000D4E79 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				ABF5CAED2E3403F9000D4E79 /* SponUp2.0 */,
+			);
+			name = SponUp2.0;
+			packageProductDependencies = (
+				AB45F53B2E3AA1AD007066F8 /* FirebaseAI */,
+				AB45F53D2E3AA1AD007066F8 /* FirebaseAnalytics */,
+				AB45F53F2E3AA1AD007066F8 /* FirebaseAuth */,
+				AB45F5412E3AA1AD007066F8 /* FirebaseAuthCombine-Community */,
+				AB45F5432E3AA1AD007066F8 /* FirebaseFirestore */,
+				ABBDF9062E52DA7500D5B5B0 /* FirebaseStorage */,
+			);
+			productName = SponUp2.0;
+			productReference = ABF5CAEB2E3403F9000D4E79 /* SponUp2.0.app */;
+			productType = "com.apple.product-type.application";
+		};
+		ABF5CAFA2E3403FC000D4E79 /* SponUp2.0Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ABF5CB122E3403FC000D4E79 /* Build configuration list for PBXNativeTarget "SponUp2.0Tests" */;
+			buildPhases = (
+				ABF5CAF72E3403FC000D4E79 /* Sources */,
+				ABF5CAF82E3403FC000D4E79 /* Frameworks */,
+				ABF5CAF92E3403FC000D4E79 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ABF5CAFD2E3403FC000D4E79 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				ABF5CAFE2E3403FC000D4E79 /* SponUp2.0Tests */,
+			);
+			name = SponUp2.0Tests;
+			packageProductDependencies = (
+			);
+			productName = SponUp2.0Tests;
+			productReference = ABF5CAFB2E3403FC000D4E79 /* SponUp2.0Tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		ABF5CB042E3403FC000D4E79 /* SponUp2.0UITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ABF5CB152E3403FC000D4E79 /* Build configuration list for PBXNativeTarget "SponUp2.0UITests" */;
+			buildPhases = (
+				ABF5CB012E3403FC000D4E79 /* Sources */,
+				ABF5CB022E3403FC000D4E79 /* Frameworks */,
+				ABF5CB032E3403FC000D4E79 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ABF5CB072E3403FC000D4E79 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				ABF5CB082E3403FC000D4E79 /* SponUp2.0UITests */,
+			);
+			name = SponUp2.0UITests;
+			packageProductDependencies = (
+			);
+			productName = SponUp2.0UITests;
+			productReference = ABF5CB052E3403FC000D4E79 /* SponUp2.0UITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		ABF5CAE32E3403F9000D4E79 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					ABF5CAEA2E3403F9000D4E79 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					ABF5CAFA2E3403FC000D4E79 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = ABF5CAEA2E3403F9000D4E79;
+					};
+					ABF5CB042E3403FC000D4E79 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = ABF5CAEA2E3403F9000D4E79;
+					};
+				};
+			};
+			buildConfigurationList = ABF5CAE62E3403F9000D4E79 /* Build configuration list for PBXProject "SponUp2.0" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = ABF5CAE22E3403F9000D4E79;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AB45F53A2E3AA1AD007066F8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = ABF5CAEC2E3403F9000D4E79 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				ABF5CAEA2E3403F9000D4E79 /* SponUp2.0 */,
+				ABF5CAFA2E3403FC000D4E79 /* SponUp2.0Tests */,
+				ABF5CB042E3403FC000D4E79 /* SponUp2.0UITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		ABF5CAE92E3403F9000D4E79 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ABF5CB4F2E3A8A94000D4E79 /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ABF5CAF92E3403FC000D4E79 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ABF5CB032E3403FC000D4E79 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		ABF5CAE72E3403F9000D4E79 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ABF5CB252E3404BE000D4E79 /* LeaderboardStrip.swift in Sources */,
+				ABD38B8F2E41DB4300CC17BD /* ChaiLauncher.swift in Sources */,
+				ABF2835B2E3DEE850057C6E6 /* SponsorAthleteView.swift in Sources */,
+				ABF5CB1B2E340470000D4E79 /* Models.swift in Sources */,
+				ABF5CB1D2E34047E000D4E79 /* MockData.swift in Sources */,
+				ABF283592E3D70800057C6E6 /* FundingCartView.swift in Sources */,
+				ABF283572E3C887D0057C6E6 /* SponsorProfileView.swift in Sources */,
+				ABF5CB1F2E34049C000D4E79 /* ViewModels.swift in Sources */,
+				ABF283512E3ABA280057C6E6 /* HeroHeader.swift in Sources */,
+				ABF5CB452E39F200000D4E79 /* ToastView.swift in Sources */,
+				ABF5CB432E3814DB000D4E79 /* EventsView.swift in Sources */,
+				ABF5CB4B2E39FF6F000D4E79 /* SponsorHomeView.swift in Sources */,
+				ABF5CB412E3729AC000D4E79 /* LeaderboardView.swift in Sources */,
+				ABF283532E3ACC560057C6E6 /* WelcomeHeader.swift in Sources */,
+				ABF5CB2D2E3404E1000D4E79 /* ProgressToNextSkinView.swift in Sources */,
+				ABD38B972E449BA300CC17BD /* TrainingTitlesView.swift in Sources */,
+				ABF5CB2B2E3404D8000D4E79 /* SuggestedChallengesSection.swift in Sources */,
+				ABF5CB492E39FD62000D4E79 /* SignUpView.swift in Sources */,
+				ABF5CB352E34050B000D4E79 /* ProfileView.swift in Sources */,
+				ABBDF9052E52693000D5B5B0 /* SponsoredChallengesViewModel.swift in Sources */,
+				ABF5CB192E34044B000D4E79 /* SponUp2App.swift in Sources */,
+				ABF5CB272E3404C7000D4E79 /* FilterChip.swift in Sources */,
+				ABF283552E3BF8620057C6E6 /* HeroChallengeCardView.swift in Sources */,
+				ABF5CB4D2E3A002E000D4E79 /* SignInView.swift in Sources */,
+				ABF2834F2E3AB84E0057C6E6 /* ChallengeRowView.swift in Sources */,
+				ABF5CB3F2E357255000D4E79 /* AthleteHomeView.swift in Sources */,
+				ABD38B8B2E412C7B00CC17BD /* YTDSummaryChallenge.swift in Sources */,
+				ABF5CB312E3404F6000D4E79 /* MyChallengesView.swift in Sources */,
+				ABD38B932E449B8B00CC17BD /* ChallengeTitleStore.swift in Sources */,
+				ABF5CB332E340502000D4E79 /* WalletView.swift in Sources */,
+				ABD38B912E41DF3E00CC17BD /* ChatMessage.swift in Sources */,
+				ABF5CB292E3404CF000D4E79 /* ChallengeCardView.swift in Sources */,
+				ABBDF9032E52528F00D5B5B0 /* SponsoredTab.swift in Sources */,
+				ABD38B952E449B9900CC17BD /* GameTitlesView.swift in Sources */,
+				ABF5CB212E3404AA000D4E79 /* MainTabView.swift in Sources */,
+				ABF5CB3B2E355E0B000D4E79 /* GradientBackground.swift in Sources */,
+				ABF5CB392E3548E4000D4E79 /* ScrollOffsetKey.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ABF5CAF72E3403FC000D4E79 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ABF5CB012E3403FC000D4E79 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		ABF5CAFD2E3403FC000D4E79 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ABF5CAEA2E3403F9000D4E79 /* SponUp2.0 */;
+			targetProxy = ABF5CAFC2E3403FC000D4E79 /* PBXContainerItemProxy */;
+		};
+		ABF5CB072E3403FC000D4E79 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ABF5CAEA2E3403F9000D4E79 /* SponUp2.0 */;
+			targetProxy = ABF5CB062E3403FC000D4E79 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		ABF5CB0D2E3403FC000D4E79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		ABF5CB0E2E3403FC000D4E79 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		ABF5CB102E3403FC000D4E79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"SponUp2.0/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need your microphone so you can speak commands to Chai.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "We need to transcribe your speech so Chai can understand what you say.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.SponUp2-0";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		ABF5CB112E3403FC000D4E79 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"SponUp2.0/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need your microphone so you can speak commands to Chai.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "We need to transcribe your speech so Chai can understand what you say.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.SponUp2-0";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		ABF5CB132E3403FC000D4E79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.SponUp2-0Tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SponUp2.0.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SponUp2.0";
+			};
+			name = Debug;
+		};
+		ABF5CB142E3403FC000D4E79 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.SponUp2-0Tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SponUp2.0.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SponUp2.0";
+			};
+			name = Release;
+		};
+		ABF5CB162E3403FC000D4E79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.SponUp2-0UITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = SponUp2.0;
+			};
+			name = Debug;
+		};
+		ABF5CB172E3403FC000D4E79 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.SponUp2-0UITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = SponUp2.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		ABF5CAE62E3403F9000D4E79 /* Build configuration list for PBXProject "SponUp2.0" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ABF5CB0D2E3403FC000D4E79 /* Debug */,
+				ABF5CB0E2E3403FC000D4E79 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ABF5CB0F2E3403FC000D4E79 /* Build configuration list for PBXNativeTarget "SponUp2.0" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ABF5CB102E3403FC000D4E79 /* Debug */,
+				ABF5CB112E3403FC000D4E79 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ABF5CB122E3403FC000D4E79 /* Build configuration list for PBXNativeTarget "SponUp2.0Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ABF5CB132E3403FC000D4E79 /* Debug */,
+				ABF5CB142E3403FC000D4E79 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ABF5CB152E3403FC000D4E79 /* Build configuration list for PBXNativeTarget "SponUp2.0UITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ABF5CB162E3403FC000D4E79 /* Debug */,
+				ABF5CB172E3403FC000D4E79 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AB45F53A2E3AA1AD007066F8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AB45F53B2E3AA1AD007066F8 /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AB45F53A2E3AA1AD007066F8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		AB45F53D2E3AA1AD007066F8 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AB45F53A2E3AA1AD007066F8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		AB45F53F2E3AA1AD007066F8 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AB45F53A2E3AA1AD007066F8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		AB45F5412E3AA1AD007066F8 /* FirebaseAuthCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AB45F53A2E3AA1AD007066F8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseAuthCombine-Community";
+		};
+		AB45F5432E3AA1AD007066F8 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AB45F53A2E3AA1AD007066F8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		ABBDF9062E52DA7500D5B5B0 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AB45F53A2E3AA1AD007066F8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = ABF5CAE32E3403F9000D4E79 /* Project object */;
+}
