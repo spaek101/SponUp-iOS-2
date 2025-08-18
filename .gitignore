@@ -11,3 +11,6 @@ Package.resolved
 
 # macOS
 .DS_Store
+
+# (Optional) If you want to keep Firebase plist private, uncomment:
+# GoogleService-Info.plist
