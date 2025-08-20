@@ -2,6 +2,8 @@ import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
 
+// MARK: - AthleteHomeView
+
 struct AthleteHomeView: View {
     let userFullName: String
 
@@ -14,15 +16,12 @@ struct AthleteHomeView: View {
     // Backend-loaded data
     @State private var events: [Event] = []
     @State private var acceptedChallenges: [Challenge] = []
-    // ADD this line
     @StateObject private var sponsoredVM = SponsoredChallengesViewModel()
-
 
     // AI-generated challenges (reward + training)
     @State private var aiRewardChallenges: [Challenge] = []
     @State private var aiTrainingChallenges: [Challenge] = []
 
-    @State private var showLeaderboard = false
     @State private var heroHeaderHeight: CGFloat = 160
 
     // Loading gate to prevent "No games" flicker
@@ -34,6 +33,13 @@ struct AthleteHomeView: View {
 
     @State private var userID: String? = Auth.auth().currentUser?.uid
 
+    // Banner state
+    @State private var pendingAccepted: [Challenge] = []
+    @State private var showChallengeLink = false
+
+    // Present details as a sheet (prevents frozen UI)
+    @State private var navigateToLinkDetails = false
+
     private let db = Firestore.firestore()
 
     var body: some View {
@@ -44,26 +50,13 @@ struct AthleteHomeView: View {
                         let userFirstName = userFullName.components(separatedBy: " ").first ?? ""
                         let userLastName = userFullName.components(separatedBy: " ").dropFirst().joined(separator: " ")
 
-                        WelcomeHeader(userFirstName: userFirstName, userLastName: userLastName)
-                            .padding(.top, 0)
-
-                        // Top Stats only (Points & Cash) — right aligned
-                        HStack {
-                            Spacer()
-                            HStack(spacing: 8) {
-                                StatChip(
-                                    icon: "star.fill",
-                                    text: "\(tierVM.points) pts",
-                                    width: 78
-                                )
-                                StatChip(
-                                    icon: "dollarsign.circle.fill",
-                                    text: "\(Int(acceptedChallenges.compactMap { $0.rewardCash }.reduce(0, +)))",
-                                    width: 78
-                                )
-                            }
-                            .padding(.trailing, 16)
-                        }
+                        WelcomeHeader(
+                            userFirstName: userFirstName,
+                            userLastName: userLastName,
+                            points: tierVM.points,
+                            cash: Int(acceptedChallenges.compactMap { $0.rewardCash }.reduce(0, +))
+                        )
+                        .padding(.top, 0)
 
                         // Header area: loading → hero → empty-state
                         Group {
@@ -74,7 +67,6 @@ struct AthleteHomeView: View {
                                     .padding(.horizontal, 16)
                                     .padding(.top, 16)
                                     .redacted(reason: .placeholder)
-
                             } else {
                                 let cal = Calendar.current
                                 let todaysEvents = events
@@ -91,14 +83,13 @@ struct AthleteHomeView: View {
                                     HeroHeader(
                                         eventsForToday: listToShow,
                                         acceptedChallenges: acceptedChallenges,
-                                        userFirstName: userFullName.components(separatedBy: " ").first ?? "",
-                                        userLastName: userFullName.components(separatedBy: " ").dropFirst().joined(separator: " "),
+                                        userFirstName: userFirstName,
+                                        userLastName: userLastName,
                                         heroHeight: $heroHeaderHeight
                                     )
                                     .padding(.horizontal, 0)
                                     .padding(.top, 20)
                                     .padding(.bottom, 150)
-
                                 } else {
                                     ZStack {
                                         Image("UpcomingGame")
@@ -124,30 +115,30 @@ struct AthleteHomeView: View {
 
                         // Tabs row
                         VStack(spacing: 12) {
-                            LeaderboardStrip(
-                                topEntries: Array(leaderboardVM.entries.prefix(5)),
-                                onTapLeaderboard: { leaderboardVM.refresh() },
-                                tapAnywhere: true
-                            )
-
                             NavigationLink {
                                 LeaderboardView().environmentObject(leaderboardVM)
                             } label: {
-                                Text("View Leaderboard")
-                                    .font(.footnote.bold())
-                                    .foregroundColor(.black)
-                                    .padding(.vertical, 4)
-                                    .padding(.trailing, 12)
+                                HStack {
+                                    Spacer()
+                                    Text("View Leaderboard")
+                                        .font(.footnote.bold())
+                                        .foregroundColor(.black)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 10)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .shadow(color: .black.opacity(0.08), radius: 3, x: 0, y: 2)
                             }
-                            .frame(maxWidth: .infinity, alignment: .trailing)
                             .buttonStyle(PlainButtonStyle())
+                            .padding(.horizontal)
 
                             HStack(spacing: 12) {
                                 Button("Challenge") { selectedFilter = .eventFocus }
                                     .tabStyle(selectedFilter == .eventFocus)
                                 Button("Training") { selectedFilter = .training }
                                     .tabStyle(selectedFilter == .training)
-                                Button("Sponsored") { selectedFilter = .sponsored }     // NEW TAB
+                                Button("Sponsored") { selectedFilter = .sponsored }
                                     .tabStyle(selectedFilter == .sponsored)
                                 Spacer()
                             }
@@ -156,7 +147,6 @@ struct AthleteHomeView: View {
 
                         // Suggested Challenges content
                         if selectedFilter == .eventFocus {
-                            // Only show AI “rewards” in Event Focus
                             if !aiRewardChallenges.isEmpty {
                                 SuggestedChallengesSection(
                                     challenges: $aiRewardChallenges,
@@ -176,7 +166,6 @@ struct AthleteHomeView: View {
                                 }
                                 .padding(.horizontal)
                             }
-
                         } else if selectedFilter == .training, !aiTrainingChallenges.isEmpty {
                             SuggestedChallengesSection(
                                 challenges: $aiTrainingChallenges,
@@ -195,7 +184,6 @@ struct AthleteHomeView: View {
                                 )
                             }
                             .padding(.horizontal)
-
                         } else if selectedFilter == .sponsored {
                             // Live Firestore-backed sponsored challenges
                             SponsoredTab(
@@ -244,26 +232,63 @@ struct AthleteHomeView: View {
                     leaderboardVM.refresh()
                 }
 
-                // 🔥 Start listening for sponsored challenges
+                // Start listening for sponsored challenges
                 if let uid = Auth.auth().currentUser?.uid {
-                    sponsoredVM.start(for: uid)   // pass useAltCollection: true if you wrote under sponsoredChallenges/
+                    sponsoredVM.start(for: uid)
                 }
             }
             .onDisappear {
-                // 🔥 Clean up listener when leaving screen
                 sponsoredVM.stop()
             }
-
-
-            .safeAreaInset(edge: .bottom) {
-                ProgressToNextSkinView(
-                    current: tierVM.points,
-                    target: tierVM.nextSkinTarget
+            // Bottom banner appears as soon as first challenge is selected
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if showChallengeLink && !pendingAccepted.isEmpty {
+                    ChallengeLinkBanner(
+                        avatars: linkModels(),                // [ChallengeLink]
+                        headline: "Link",
+                        subheadline: "Tap to review",
+                        maxVisibleAvatars: 6,
+                        onPrimaryTap: {
+                            // Hide banner, then open sheet
+                            showChallengeLink = false
+                            navigateToLinkDetails = true
+                        },
+                        onDismiss: {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+                                showChallengeLink = false
+                            }
+                        }
+                    )
+                    .onTapGesture {
+                        showChallengeLink = false
+                        navigateToLinkDetails = true
+                    }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(1)
+                } else {
+                    Color.clear.frame(height: 0)
+                }
+            }
+            // Present details as a SHEET (avoids overlay freezes)
+            .sheet(isPresented: $navigateToLinkDetails, onDismiss: {
+                // If picks still exist, you can show the banner again
+                showChallengeLink = !pendingAccepted.isEmpty
+            }) {
+                ChallengeLinkDetails(
+                    selectedChallenges: $pendingAccepted,
+                    targetEventTitle: eventToShow()?.title,
+                    onConfirmLink: {
+                        // Commit your link action here if needed
+                        navigateToLinkDetails = false
+                        showChallengeLink = false
+                    },
+                    onClear: {
+                        withAnimation { pendingAccepted.removeAll() }
+                        navigateToLinkDetails = false
+                        showChallengeLink = false
+                    }
                 )
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .padding(.bottom, 0)
+                .interactiveDismissDisabled(false)
             }
         }
     }
@@ -359,8 +384,6 @@ struct AthleteHomeView: View {
             }
     }
 
-    
-
     private func loadEvents() {
         db.collection("events").getDocuments { snapshot, _ in
             events = snapshot?.documents.compactMap { parseEventDocument($0) } ?? []
@@ -398,20 +421,30 @@ struct AthleteHomeView: View {
     private func acceptChallenge(_ challenge: Challenge) {
         guard let cid = challenge.id else { showToast("Missing ID"); return }
 
-        // Toggle: if already accepted → remove it (works for both training & game)
+        // Toggle: if already accepted → remove it
         if let accepted = acceptedChallenges.first(where: { $0.id == cid }) {
             unacceptChallenge(challengeID: cid, eventID: accepted.eventID)
             return
         }
 
-        // 🚫 TRAINING: never attach to an event
+        // Add to banner selection immediately (first selection triggers banner)
+        if !pendingAccepted.contains(where: { $0.id == cid }) {
+            pendingAccepted.append(challenge)
+            if pendingAccepted.count == 1 {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+                    showChallengeLink = true
+                }
+            }
+        }
+
+        // TRAINING: never attach to an event
         if challenge.type == .training {
             saveAcceptedChallenge(challenge, eventID: nil)
             showToast("Added to your training.")
             return
         }
 
-        // 🏟️ GAME (reward/sponsored): attach to earliest upcoming event
+        // GAME (reward/sponsored): attach to earliest upcoming event
         let candidates = events
             .filter { $0.startAt >= Date() }
             .sorted { $0.startAt < $1.startAt }
@@ -477,6 +510,14 @@ struct AthleteHomeView: View {
 
     private func unacceptChallenge(challengeID cid: String, eventID: String?) {
         guard let uid = userID else { return }
+
+        // Remove from banner selection too
+        pendingAccepted.removeAll { $0.id == cid }
+        if pendingAccepted.isEmpty {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+                showChallengeLink = false
+            }
+        }
 
         // Optimistic UI
         acceptedChallenges.removeAll { $0.id == cid }
@@ -589,12 +630,41 @@ struct AthleteHomeView: View {
         )
     }
 
+    // MARK: — Toast
+
     private func showToast(_ message: String) {
         toastTimer?.invalidate()
         toastMessage = message
         toastTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { _ in
             withAnimation { toastMessage = nil }
         }
+    }
+
+    // MARK: — Banner helpers (maps pendingAccepted → [ChallengeLink])
+
+    private func linkModels() -> [ChallengeLink] {
+        pendingAccepted.map { ch in
+            let (url, asset) = challengeBackground(for: ch)
+            return ChallengeLink(
+                id: ch.id ?? UUID().uuidString,
+                imageURL: url,
+                imageName: asset,
+                initials: initialsFromTitle(ch.title),
+                accentSymbolName: "bolt.fill"
+            )
+        }
+    }
+
+    /// Default to a bundled asset; fallback is initials bubble
+    private func challengeBackground(for challenge: Challenge) -> (URL?, String?) {
+        return (nil, "challenge_default")
+    }
+
+    private func initialsFromTitle(_ title: String) -> String {
+        let parts = title.split(separator: " ")
+        let first = parts.first?.first.map(String.init) ?? "C"
+        let second = parts.dropFirst().first?.first.map(String.init) ?? ""
+        return (first + second).uppercased()
     }
 
     private func eventToShow() -> Event? {
@@ -619,9 +689,9 @@ private extension View {
             .font(.caption.bold())
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(selected ? Color.gray : Color.gray.opacity(0.3))
+            .background(selected ? Color.brown : Color(red: 0.93, green: 0.87, blue: 0.74))
             .foregroundColor(.white)
-            .cornerRadius(6)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 
@@ -651,4 +721,3 @@ private struct StatChip: View {
         .clipShape(Capsule())
     }
 }
-

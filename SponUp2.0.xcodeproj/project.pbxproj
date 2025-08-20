@@ -15,6 +15,11 @@
 		ABBDF9032E52528F00D5B5B0 /* SponsoredTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF9022E52528F00D5B5B0 /* SponsoredTab.swift */; };
 		ABBDF9052E52693000D5B5B0 /* SponsoredChallengesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF9042E52693000D5B5B0 /* SponsoredChallengesViewModel.swift */; };
 		ABBDF9072E52DA7500D5B5B0 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = ABBDF9062E52DA7500D5B5B0 /* FirebaseStorage */; };
+		ABBDF9092E54D78700D5B5B0 /* TiledBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF9082E54D78700D5B5B0 /* TiledBackground.swift */; };
+		ABBDF90B2E54E4AD00D5B5B0 /* YourRank.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF90A2E54E4AD00D5B5B0 /* YourRank.swift */; };
+		ABBDF90D2E551DFA00D5B5B0 /* SilverCheckeredFoil.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF90C2E551DFA00D5B5B0 /* SilverCheckeredFoil.swift */; };
+		ABBDF90F2E55A2AC00D5B5B0 /* ChallengeLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF90E2E55A2AC00D5B5B0 /* ChallengeLink.swift */; };
+		ABBDF9112E56277C00D5B5B0 /* ChallengeLinkDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF9102E56277C00D5B5B0 /* ChallengeLinkDetails.swift */; };
 		ABD38B8B2E412C7B00CC17BD /* YTDSummaryChallenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B8A2E412C7B00CC17BD /* YTDSummaryChallenge.swift */; };
 		ABD38B8F2E41DB4300CC17BD /* ChaiLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B8E2E41DB4300CC17BD /* ChaiLauncher.swift */; };
 		ABD38B912E41DF3E00CC17BD /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B902E41DF3E00CC17BD /* ChatMessage.swift */; };
@@ -73,6 +78,11 @@
 /* Begin PBXFileReference section */
 		ABBDF9022E52528F00D5B5B0 /* SponsoredTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsoredTab.swift; sourceTree = "<group>"; };
 		ABBDF9042E52693000D5B5B0 /* SponsoredChallengesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsoredChallengesViewModel.swift; sourceTree = "<group>"; };
+		ABBDF9082E54D78700D5B5B0 /* TiledBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TiledBackground.swift; sourceTree = "<group>"; };
+		ABBDF90A2E54E4AD00D5B5B0 /* YourRank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YourRank.swift; sourceTree = "<group>"; };
+		ABBDF90C2E551DFA00D5B5B0 /* SilverCheckeredFoil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilverCheckeredFoil.swift; sourceTree = "<group>"; };
+		ABBDF90E2E55A2AC00D5B5B0 /* ChallengeLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeLink.swift; sourceTree = "<group>"; };
+		ABBDF9102E56277C00D5B5B0 /* ChallengeLinkDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeLinkDetails.swift; sourceTree = "<group>"; };
 		ABD38B8A2E412C7B00CC17BD /* YTDSummaryChallenge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YTDSummaryChallenge.swift; sourceTree = "<group>"; };
 		ABD38B8E2E41DB4300CC17BD /* ChaiLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChaiLauncher.swift; sourceTree = "<group>"; };
 		ABD38B902E41DF3E00CC17BD /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
@@ -178,6 +188,7 @@
 				ABF5CB1C2E34047E000D4E79 /* MockData.swift */,
 				ABF283542E3BF8610057C6E6 /* HeroChallengeCardView.swift */,
 				ABF283522E3ACC560057C6E6 /* WelcomeHeader.swift */,
+				ABBDF9082E54D78700D5B5B0 /* TiledBackground.swift */,
 				ABF2834E2E3AB84E0057C6E6 /* ChallengeRowView.swift */,
 				ABF5CB4A2E39FF6F000D4E79 /* SponsorHomeView.swift */,
 				ABF2835A2E3DEE850057C6E6 /* SponsorAthleteView.swift */,
@@ -189,11 +200,15 @@
 				ABF5CB082E3403FC000D4E79 /* SponUp2.0UITests */,
 				ABF5CAEC2E3403F9000D4E79 /* Products */,
 				ABF5CB3E2E357255000D4E79 /* AthleteHomeView.swift */,
+				ABBDF90E2E55A2AC00D5B5B0 /* ChallengeLink.swift */,
+				ABBDF9102E56277C00D5B5B0 /* ChallengeLinkDetails.swift */,
+				ABBDF90C2E551DFA00D5B5B0 /* SilverCheckeredFoil.swift */,
 				ABBDF9022E52528F00D5B5B0 /* SponsoredTab.swift */,
 				ABD38B922E449B8B00CC17BD /* ChallengeTitleStore.swift */,
 				ABD38B942E449B9900CC17BD /* GameTitlesView.swift */,
 				ABD38B962E449BA300CC17BD /* TrainingTitlesView.swift */,
 				ABF283502E3ABA280057C6E6 /* HeroHeader.swift */,
+				ABBDF90A2E54E4AD00D5B5B0 /* YourRank.swift */,
 				ABF5CB402E3729AB000D4E79 /* LeaderboardView.swift */,
 				ABF5CB242E3404BE000D4E79 /* LeaderboardStrip.swift */,
 				ABF5CB302E3404F6000D4E79 /* MyChallengesView.swift */,
@@ -380,6 +395,8 @@
 				ABF2835B2E3DEE850057C6E6 /* SponsorAthleteView.swift in Sources */,
 				ABF5CB1B2E340470000D4E79 /* Models.swift in Sources */,
 				ABF5CB1D2E34047E000D4E79 /* MockData.swift in Sources */,
+				ABBDF90D2E551DFA00D5B5B0 /* SilverCheckeredFoil.swift in Sources */,
+				ABBDF90F2E55A2AC00D5B5B0 /* ChallengeLink.swift in Sources */,
 				ABF283592E3D70800057C6E6 /* FundingCartView.swift in Sources */,
 				ABF283572E3C887D0057C6E6 /* SponsorProfileView.swift in Sources */,
 				ABF5CB1F2E34049C000D4E79 /* ViewModels.swift in Sources */,
@@ -389,7 +406,9 @@
 				ABF5CB4B2E39FF6F000D4E79 /* SponsorHomeView.swift in Sources */,
 				ABF5CB412E3729AC000D4E79 /* LeaderboardView.swift in Sources */,
 				ABF283532E3ACC560057C6E6 /* WelcomeHeader.swift in Sources */,
+				ABBDF9092E54D78700D5B5B0 /* TiledBackground.swift in Sources */,
 				ABF5CB2D2E3404E1000D4E79 /* ProgressToNextSkinView.swift in Sources */,
+				ABBDF9112E56277C00D5B5B0 /* ChallengeLinkDetails.swift in Sources */,
 				ABD38B972E449BA300CC17BD /* TrainingTitlesView.swift in Sources */,
 				ABF5CB2B2E3404D8000D4E79 /* SuggestedChallengesSection.swift in Sources */,
 				ABF5CB492E39FD62000D4E79 /* SignUpView.swift in Sources */,
@@ -401,6 +420,7 @@
 				ABF5CB4D2E3A002E000D4E79 /* SignInView.swift in Sources */,
 				ABF2834F2E3AB84E0057C6E6 /* ChallengeRowView.swift in Sources */,
 				ABF5CB3F2E357255000D4E79 /* AthleteHomeView.swift in Sources */,
+				ABBDF90B2E54E4AD00D5B5B0 /* YourRank.swift in Sources */,
 				ABD38B8B2E412C7B00CC17BD /* YTDSummaryChallenge.swift in Sources */,
 				ABF5CB312E3404F6000D4E79 /* MyChallengesView.swift in Sources */,
 				ABD38B932E449B8B00CC17BD /* ChallengeTitleStore.swift in Sources */,

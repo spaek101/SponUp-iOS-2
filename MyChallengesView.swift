@@ -8,18 +8,8 @@ import FirebaseFunctions
 #endif
 import UniformTypeIdentifiers
 
-
-
 struct MyChallengesView: View {
     @State private var acceptedChallenges: [Challenge] = []
-
-    // Tabs
-    private enum ChallengeScope: String, CaseIterable, Identifiable {
-        case game = "Game Challenges"
-        case training = "Training Challenges"
-        var id: String { rawValue }
-    }
-    @State private var scope: ChallengeScope = .game
 
     private let db = Firestore.firestore()
     private let userID = Auth.auth().currentUser?.uid
@@ -37,32 +27,17 @@ struct MyChallengesView: View {
     @State private var uploadError: String?
     @State private var toastText: String?
 
-    // MARK: - Filters (robust)
-
+    // MARK: - Filter: training only
     private var filteredChallenges: [Challenge] {
-        let list = acceptedChallenges.filter { ch in
-            switch scope {
-            case .game:     return isGameChallenge(ch)
-            case .training: return isTrainingChallenge(ch)
-            }
-        }
-        return list.sorted { ($0.acceptedDate ?? .distantPast) > ($1.acceptedDate ?? .distantPast) }
-    }
-
-    private func isGameChallenge(_ c: Challenge) -> Bool {
-        if c.category == ChallengeCategory(rawValue: "reward") { return true }
-        if c.category == ChallengeCategory(rawValue: "training") { return false }
-        let cat = c.category.rawValue.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        if cat == "reward" || cat.contains("reward") { return true }
-        if cat == "training" || cat.contains("training") { return false }
-        if let eid = c.eventID, !eid.isEmpty { return true }
-        return false
+        acceptedChallenges
+            .filter { isTrainingChallenge($0) }
+            .sorted { ($0.acceptedDate ?? .distantPast) > ($1.acceptedDate ?? .distantPast) }
     }
 
     private func isTrainingChallenge(_ c: Challenge) -> Bool {
         let cat = c.category.rawValue.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if cat == "training" || cat.contains("training") { return true }
-        if cat == "reward" || cat.contains("reward") { return false }
+        if cat == "reward"   || cat.contains("reward")   { return false }
         if let eid = c.eventID, !eid.isEmpty { return false }
         return true
     }
@@ -74,18 +49,11 @@ struct MyChallengesView: View {
             ZStack {
                 ScrollView {
                     VStack(spacing: 16) {
-                        // Tabs
-                        Picker("", selection: $scope) {
-                            ForEach(ChallengeScope.allCases) { s in
-                                Text(s.rawValue).tag(s)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
+
+                        // No tabs — training only
 
                         if filteredChallenges.isEmpty {
-                            Text(emptyStateText)
+                            Text("No training challenges yet.")
                                 .foregroundColor(.white.opacity(0.9))
                                 .font(.title3.weight(.semibold))
                                 .padding(.top, 24)
@@ -216,13 +184,6 @@ struct MyChallengesView: View {
         }
     }
 
-    private var emptyStateText: String {
-        switch scope {
-        case .game:     return "No game challenges yet."
-        case .training: return "No training challenges yet."
-        }
-    }
-
     // MARK: - Helpers
 
     private func rewardLine(for c: Challenge) -> String {
@@ -286,14 +247,12 @@ struct MyChallengesView: View {
                 let verdict = (data["aiVerdict"] as? String) ?? ""
                 if status == "passed" || verdict == "passed" {
                     toastText = "✅ Verified!"
-                    // Optionally mark challenge completed locally for immediate UX:
                     if let chID = data["challengeID"] as? String,
                        let idx = acceptedChallenges.firstIndex(where: { $0.id == chID }) {
                         var ch = acceptedChallenges[idx]
                         ch.state = .completed
                         acceptedChallenges[idx] = ch
                     }
-                    // Optionally update Firestore official record here...
                 } else if status == "failed" || verdict == "failed" {
                     toastText = "❌ Not enough proof. Try again."
                 }
@@ -333,7 +292,6 @@ struct MyChallengesView: View {
 
     private func triggerAIVerification(uid: String,
                                        submissionID: String) {
-        // Optional Cloud Function (if you added FirebaseFunctions)
         #if canImport(FirebaseFunctions)
         functions.httpsCallable("aiVerifyChallengeProof").call([
             "uid": uid,
@@ -404,13 +362,11 @@ struct MyChallengesView: View {
             pendingUploadChallenge = nil
         }
 
-        // Try loading as Data first (works for images and many videos)
         if let (data, ext) = await loadDataAndExt(from: item) {
             await uploadDataToStorage(data, ext: ext, challenge: challenge)
             return
         }
 
-        // iOS 17+: fall back to a temp file URL (better for large videos)
         if #available(iOS 17.0, *),
            let (url, ext) = await loadFileURLAndExt(from: item) {
             await uploadFileURLToStorage(url, ext: ext, challenge: challenge)
@@ -427,9 +383,7 @@ struct MyChallengesView: View {
                 let ext = ut?.preferredFilenameExtension?.lowercased() ?? guessExt(from: ut) ?? "bin"
                 return (data, ext)
             }
-        } catch {
-            // fall through to URL approach on iOS 17+
-        }
+        } catch { }
         return nil
     }
 
@@ -455,7 +409,6 @@ struct MyChallengesView: View {
         if ut.conforms(to: .commaSeparatedText) { return "csv" }
         return nil
     }
-
 
     private func handlePickedDocURL(_ url: URL?) async {
         guard let url, let challenge = pendingUploadChallenge else { return }

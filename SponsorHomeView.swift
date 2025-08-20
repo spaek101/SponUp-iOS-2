@@ -53,45 +53,17 @@ struct SponsorHomeView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
 
-                        // ── Wallet Balance + Chai Icon ─────────────────────────
-                        HStack {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Wallet Balance")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    Text(String(format: "$%.2f", walletBalance))
-                                        .font(.title).bold()
-                                }
-                                Spacer()
-                                Button("Quick Top-Up") {
-                                    // TODO: present top-up flow
-                                }
-                                .bold()
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
-                            }
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(12)
-                            .frame(height: cardHeight)
-
-                            Button {
-                                withAnimation { isChatOpen.toggle() }
-                            } label: {
-                                Image("Chai")
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(height: cardHeight)
-                                    .padding(.leading, 8)
-                            }
-
-                            Spacer()
+                        // ── Top row: Sponsor header (includes balance + Add) ───────────────
+                        WelcomeHeader(
+                            userFirstName: userFullName.components(separatedBy: " ").first ?? "",
+                            userLastName:  userFullName.components(separatedBy: " ").dropFirst().joined(separator: " "),
+                            balance:       walletBalance,
+                            compact:       true
+                        ) {
+                            // TODO: present top-up flow
                         }
                         .padding(.horizontal)
+
 
                         // ── Instruction Text ──────────────────────────
                         Text("Select the athletes you would like to challenge.")
@@ -258,7 +230,7 @@ struct SponsorHomeView: View {
                 Text("Pick who you want to fund first, then choose challenges.")
             }
 
-            .navigationTitle("Sponsor Home")
+
             .navigationBarTitleDisplayMode(.inline)
             .background(Color(.systemBackground))
             .onAppear {
@@ -390,6 +362,19 @@ struct SponsorHomeView: View {
             // Deduct from wallet (simple local sim)
             walletBalance = max(0, walletBalance - totalCash)
 
+            // 🔥 REMOVE funded cards from the on-screen lists
+            DispatchQueue.main.async {
+                let justFundedIDs = Set(fundedChallenges.compactMap { $0.id })
+                rewardChallenges.removeAll { ch in
+                    if let id = ch.id { return justFundedIDs.contains(id) }
+                    return false
+                }
+                trainingChallenges.removeAll { ch in
+                    if let id = ch.id { return justFundedIDs.contains(id) }
+                    return false
+                }
+            }
+
             // Clear cart + selections
             fundedChallenges.removeAll()
             fundingTargets.removeAll()
@@ -426,6 +411,8 @@ struct SponsorHomeView: View {
                     print("funded listener error (\(athleteID)):", err.localizedDescription)
                     return
                 }
+
+                // Merge all sourceChallengeIDs that are funded/selected
                 var union = fundedSourceIDs
                 for d in snap?.documents ?? [] {
                     if let src = d.get("sourceChallengeID") as? String {
@@ -433,7 +420,20 @@ struct SponsorHomeView: View {
                     }
                 }
                 fundedSourceIDs = union
+
+                // 🔥 Remove any now-funded items from the suggestions on screen
+                DispatchQueue.main.async {
+                    rewardChallenges.removeAll { ch in
+                        guard let id = ch.id else { return false }
+                        return union.contains(id)
+                    }
+                    trainingChallenges.removeAll { ch in
+                        guard let id = ch.id else { return false }
+                        return union.contains(id)
+                    }
+                }
             }
+
             fundedListenerRegs.append(reg)
         }
     }

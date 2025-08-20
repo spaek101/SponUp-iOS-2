@@ -37,7 +37,7 @@ struct ChallengeCardView: View {
     private var buttonBackground: Color {
         if fundButton {
             if isFunded { return .gray }
-            return isSelected ? Color(red: 0.93, green: 0.87, blue: 0.74) : .blue
+            return isSelected ? Color(red: 0.93, green: 0.87, blue: 0.74) : .brown
         } else {
             return isFunded
                 ? Color(red: 0.93, green: 0.87, blue: 0.74)

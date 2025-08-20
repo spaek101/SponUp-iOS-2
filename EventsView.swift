@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import FirebaseFirestore
 import FirebaseAuth
 import PhotosUI
@@ -16,6 +17,9 @@ struct EventsView: View {
 
     // Force calendar refresh when events load
     @State private var calendarRefreshID = UUID()
+
+    // Live clock so UI flips automatically when start time passes
+    @State private var now = Date()
 
     let calendar = Calendar.current
     let daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"]
@@ -127,6 +131,10 @@ struct EventsView: View {
                 loadUserEvents()
                 loadAcceptedChallenges()
             }
+            // Tick 'now' every 15s so cards flip state automatically when event time passes
+            .onReceive(Timer.publish(every: 15, on: .main, in: .common).autoconnect()) { tick in
+                now = tick
+            }
             .navigationTitle("Events")
             .navigationBarTitleDisplayMode(.inline)
             // Same subtle background as Leaderboard/MyChallenges
@@ -149,6 +157,8 @@ struct EventsView: View {
 
                 if !eventsForDay.isEmpty {
                     ForEach(eventsForDay, id: \.id) { evt in
+                        let hasStarted = now >= evt.startAt
+
                         VStack(alignment: .leading, spacing: 8) {
                             Text("[\(timeFormatter.string(from: evt.startAt))] \(evt.title)")
                                 .font(.headline)
@@ -172,14 +182,17 @@ struct EventsView: View {
 
                                                 Spacer(minLength: 8)
 
-                                                Button {
-                                                    removeChallenge(c, from: evt)
-                                                } label: {
-                                                    Image(systemName: "xmark.circle.fill")
-                                                        .font(.system(size: 16, weight: .bold))
-                                                        .foregroundColor(.gray)
+                                                // Hide delete once the event has started (lock challenges)
+                                                if !hasStarted {
+                                                    Button {
+                                                        removeChallenge(c, from: evt)
+                                                    } label: {
+                                                        Image(systemName: "xmark.circle.fill")
+                                                            .font(.system(size: 16, weight: .bold))
+                                                            .foregroundColor(.gray)
+                                                    }
+                                                    .buttonStyle(.plain)
                                                 }
-                                                .buttonStyle(.plain)
                                             }
                                             .font(.caption)
                                             .foregroundColor(.gray)
@@ -191,6 +204,28 @@ struct EventsView: View {
                                         }
                                     }
                                 }
+                            }
+
+                            // Upload button ONLY after event start
+                            if hasStarted {
+                                PhotosPicker(
+                                    selection: $pickedItems,
+                                    matching: .images,
+                                    photoLibrary: .shared()
+                                ) {
+                                    Label("Upload Results for Event", systemImage: "square.and.arrow.up")
+                                        .font(.subheadline.bold())
+                                        .frame(maxWidth: .infinity)
+                                        .padding(8)
+                                        .background(Color.blue.opacity(0.7))
+                                        .foregroundColor(.white)
+                                        .cornerRadius(8)
+                                }
+                                .onChange(of: pickedItems) { _ in
+                                    uploadForEvent = evt
+                                    // TODO: Handle upload (Storage + link under evt.id)
+                                }
+                                .padding(.top, 8)
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -280,6 +315,9 @@ struct EventsView: View {
     }
 
     private func removeChallenge(_ challenge: Challenge, from event: Event) {
+        // Hard lock once event has started
+        if Date() >= event.startAt { return }
+
         guard let cid = challenge.id else { return }
         let eid = event.id ?? challenge.eventID
 
@@ -308,7 +346,7 @@ struct EventsView: View {
     private func loadUserEvents() {
         db.collection("events").getDocuments { snap, err in
             if let e = err { print("Error: \(e)") ; return }
-            userEvents = snap?.documents.compactMap { parseEventData($0.data()) } ?? []
+        userEvents = snap?.documents.compactMap { parseEventData($0.data()) } ?? []
             calendarRefreshID = UUID()
         }
     }

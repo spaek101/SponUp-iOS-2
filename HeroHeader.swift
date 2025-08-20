@@ -1,132 +1,131 @@
 import SwiftUI
 
 struct HeroHeader: View {
-    let eventsForToday: [Event]              // pass ALL of today's events here
+    let eventsForToday: [Event]
     let acceptedChallenges: [Challenge]
     let userFirstName: String
     let userLastName: String
-
-    @Binding var heroHeight: CGFloat         // parent controls this
-
+    @Binding var heroHeight: CGFloat
+    
     var body: some View {
         GeometryReader { proxy in
-            let topInset = proxy.safeAreaInsets.top
             let todays = eventsForToday.sorted { $0.startAt < $1.startAt }
-
-            VStack(spacing: 0) {
-
-
-                if todays.count > 1 {
-                    // Swipe between multiple games today
-                    TabView {
-                        ForEach(todays) { event in
-                            heroCard(for: event)
-                                .clipShape(RoundedRectangle(cornerRadius: 24))
-                                .padding(.horizontal, 16)
-                                .padding(.top, 20)
-                                .padding(.bottom, 20)
-                        }
+            let w      = proxy.size.width
+            let cardW  = max(230, w * 0.70)
+            let cardH  = max(160, heroHeight * 0.82)   // card height used everywhere below
+            let spacing: CGFloat = 14
+            
+            // 👇 Limit the container to exactly the card height (plus tiny breathing room)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: spacing) {
+                    ForEach(todays) { event in
+                        heroCard(for: event, cardHeight: cardH)
+                            .frame(width: cardW, height: cardH)
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                            .shadow(color: .black.opacity(0.12), radius: 5, x: 0, y: 3)
                     }
-                    .tabViewStyle(.page(indexDisplayMode: .automatic))
-                    .frame(height: heroHeight)
-
-                } else if let event = todays.first {
-                    // Single game today
-                    heroCard(for: event)
-
-                        .clipShape(RoundedRectangle(cornerRadius: 24))
-                        .padding(.horizontal, 16)
-                        .padding(.top, 0)
-                        .padding(.bottom, 20)
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6) // keep this small to avoid extra gap
+            }
+            .frame(height: cardH + 12)   // exact content height -> no leftover space
+            .ifAvailableiOS17 { view in
+                view.scrollTargetLayout()
+                    .scrollTargetBehavior(.viewAligned)
             }
         }
+        // ⛔️ No .frame(height:) out here – that’s what created the gap
     }
-
-    // MARK: - Card builder
+    
     @ViewBuilder
-    private func heroCard(for event: Event) -> some View {
-        let isToday = Calendar.current.isDateInToday(event.startAt)
-        let bgName  = isToday ? "TodaysGame" : "UpcomingGame"
-
-        ZStack(alignment: .center) {
-            // Background image
-            Image(bgName)
-                .resizable()
-                .scaledToFill()
-                .overlay(
-                    LinearGradient(
-                        colors: [
-                            Color.black.opacity(0.55),
-                            Color.black.opacity(0.35),
-                            .clear
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-
-                .clipped()
-
-            // Centered content
+    private func heroCard(for event: Event, cardHeight: CGFloat) -> some View {
+        let challengesForEvent = acceptedChallenges.filter { $0.eventID == event.id }
+        
+        ZStack {
+            // Main hero background card
+            TiledBackground()
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+            
             VStack(spacing: 10) {
-                Text(event.title)
-                    .font(.title.bold())
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-
-                Text(event.startAt, style: .date)
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
-
-                let challengesForEvent = acceptedChallenges.filter { $0.eventID == event.id }
+                // 🔹 Title + Date (inside main hero card)
+                HStack(alignment: .top) {
+                    // Left side: Event title
+                    Text(event.title)
+                        .font(.title3.bold())
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // Right side: Calendar block
+                    VStack(spacing: 2) {
+                        Text(event.startAt, format: .dateTime.weekday(.abbreviated)) // Tue
+                            .font(.caption.bold())
+                            .foregroundColor(.white)
+                        Text(event.startAt, format: .dateTime.day()) // 19
+                            .font(.title3.bold())
+                            .foregroundColor(.white)
+                    }
+                    .frame(width: 44, height: 44)
+                    .background(Color.white.opacity(0.2))
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                }
+                
+                Spacer(minLength: 4)
+                
+                // 🔹 Nested challenges card (smaller card inside hero card)
                 if !challengesForEvent.isEmpty {
-                    VStack(alignment: .center, spacing: 6) {
+                    VStack(spacing: 4) {
                         ForEach(Array(challengesForEvent.prefix(3))) { c in
                             HStack(spacing: 6) {
-                                // Challenge title
                                 Text(c.title)
-                                    .font(.footnote.weight(.semibold))
+                                    .font(.caption2)
                                     .foregroundColor(.white)
                                     .lineLimit(1)
-                                    .minimumScaleFactor(0.8)
-
-                                // Reward info
+                                    .minimumScaleFactor(0.7)
+                                
                                 Text(rewardText(for: c))
-                                    .font(.footnote)
-                                    .foregroundColor(.white.opacity(0.9))
+                                    .font(.caption2)
+                                    .foregroundColor(.white)
                                     .lineLimit(1)
-                                    .minimumScaleFactor(0.8)
+                                    .minimumScaleFactor(0.7)
                             }
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-                    .padding(.top, 8)
-                    .padding(.horizontal, 16)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 10)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .background(Color.white.opacity(0.0))  // same light tile tint
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 } else {
                     Text("No challenges added.")
-                        .foregroundColor(.white.opacity(0.85))
-                        .multilineTextAlignment(.center)
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 16)
+                        .font(.caption2)
+                        .foregroundColor(.white.opacity(0.9))
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 10)
                 }
+                
+                Spacer(minLength: 2)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            .padding(.vertical, 12)
-            .padding(.horizontal, 16)
-            
+            .padding(.vertical, 8)
+            .padding(.horizontal, 10)
         }
-        .frame(height: heroHeight) // ensure each page respects the bound height
-        
+        .frame(height: cardHeight)
     }
 }
-
-// Helper for reward line
 private func rewardText(for c: Challenge) -> String {
     var parts: [String] = []
     if let cash = c.rewardCash { parts.append(String(format: "$%.0f", cash)) }
-    if let pts = c.rewardPoints { parts.append("\(pts) pts") }
+    if let pts  = c.rewardPoints { parts.append("\(pts) pts") }
     return parts.isEmpty ? "—" : parts.joined(separator: " + ")
 }
+
+private extension View {
+    @ViewBuilder
+    func ifAvailableiOS17<Content: View>(_ transform: (Self) -> Content) -> some View {
+        if #available(iOS 17.0, *) { transform(self) } else { self }
+    }
+}
+
