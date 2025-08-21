@@ -42,6 +42,15 @@ struct AthleteHomeView: View {
 
     private let db = Firestore.firestore()
 
+    private func isAccepted(_ ch: Challenge) -> Bool {
+        guard let id = ch.id else { return false }
+        let key = "\(ch.type.rawValue)|\(id)"
+        return acceptedChallenges.contains { ac in
+            guard let aid = ac.id else { return false }
+            return "\(ac.type.rawValue)|\(aid)" == key
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -91,21 +100,11 @@ struct AthleteHomeView: View {
                                     .padding(.top, 20)
                                     .padding(.bottom, 150)
                                 } else {
-                                    ZStack {
-                                        Image("UpcomingGame")
-                                            .resizable()
-                                            .scaledToFill()
-                                            .clipped()
-                                        Text("No scheduled events")
-                                            .font(.headline)
-                                            .foregroundColor(.white)
-                                            .padding(.horizontal, 16)
-                                            .shadow(radius: 4)
-                                    }
-                                    .frame(height: heroHeaderHeight)
-                                    .clipShape(RoundedRectangle(cornerRadius: 24))
-                                    .padding(.horizontal, 16)
-                                    .padding(.top, 16)
+                                    ZstackNoScheduled()
+                                        .frame(height: heroHeaderHeight)
+                                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                                        .padding(.horizontal, 16)
+                                        .padding(.top, 16)
                                 }
                             }
                         }
@@ -115,6 +114,7 @@ struct AthleteHomeView: View {
 
                         // Tabs row
                         VStack(spacing: 12) {
+                            /*
                             NavigationLink {
                                 LeaderboardView().environmentObject(leaderboardVM)
                             } label: {
@@ -132,7 +132,8 @@ struct AthleteHomeView: View {
                             }
                             .buttonStyle(PlainButtonStyle())
                             .padding(.horizontal)
-
+                            */
+                            
                             HStack(spacing: 12) {
                                 Button("Challenge") { selectedFilter = .eventFocus }
                                     .tabStyle(selectedFilter == .eventFocus)
@@ -144,6 +145,7 @@ struct AthleteHomeView: View {
                             }
                         }
                         .padding(.horizontal)
+
 
                         // Suggested Challenges content
                         if selectedFilter == .eventFocus {
@@ -160,7 +162,8 @@ struct AthleteHomeView: View {
                                             challenge: challenge,
                                             onClaim: acceptChallenge,
                                             fundButton: false,
-                                            isFunded: acceptedChallenges.contains { $0.id == challenge.id }
+                                            isFunded: isAccepted(challenge),
+                                            showCash: false
                                         )
                                     )
                                 }
@@ -179,7 +182,8 @@ struct AthleteHomeView: View {
                                         challenge: challenge,
                                         onClaim: acceptChallenge,
                                         fundButton: false,
-                                        isFunded: acceptedChallenges.contains { $0.id == challenge.id }
+                                        isFunded: isAccepted(challenge),
+                                        showCash: false
                                     )
                                 )
                             }
@@ -187,7 +191,10 @@ struct AthleteHomeView: View {
                         } else if selectedFilter == .sponsored {
                             // Live Firestore-backed sponsored challenges
                             SponsoredTab(
-                                challenges: $sponsoredVM.sponsored,
+                                challenges: Binding(
+                                    get: { sponsoredVM.sponsored },
+                                    set: { sponsoredVM.sponsored = $0 }
+                                ),
                                 selectedFilter: $selectedFilter,
                                 acceptedChallenges: acceptedChallenges,
                                 onClaim: acceptChallenge
@@ -232,8 +239,8 @@ struct AthleteHomeView: View {
                     leaderboardVM.refresh()
                 }
 
-                // Start listening for sponsored challenges
-                if let uid = Auth.auth().currentUser?.uid {
+                // ✅ Start live sponsored feed listener
+                if let uid = userID {
                     sponsoredVM.start(for: uid)
                 }
             }
@@ -244,12 +251,11 @@ struct AthleteHomeView: View {
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 if showChallengeLink && !pendingAccepted.isEmpty {
                     ChallengeLinkBanner(
-                        avatars: linkModels(),                // [ChallengeLink]
+                        avatars: linkModels(),
                         headline: "Link",
                         subheadline: "Tap to review",
                         maxVisibleAvatars: 6,
                         onPrimaryTap: {
-                            // Hide banner, then open sheet
                             showChallengeLink = false
                             navigateToLinkDetails = true
                         },
@@ -271,21 +277,88 @@ struct AthleteHomeView: View {
             }
             // Present details as a SHEET (avoids overlay freezes)
             .sheet(isPresented: $navigateToLinkDetails, onDismiss: {
-                // If picks still exist, you can show the banner again
                 showChallengeLink = !pendingAccepted.isEmpty
             }) {
                 ChallengeLinkDetails(
                     selectedChallenges: $pendingAccepted,
-                    targetEventTitle: eventToShow()?.title,
+                    upcomingEvents: events.filter { $0.startAt > Date() && $0.challengeIDs.count < 3 },
+                    onLinkSelection: { pairs in
+                        // pairs: [(challengeId, eventId)]
+                        for (cid, eid) in pairs {
+                            let ref = db.collection("events").document(eid)
+
+                            db.runTransaction({ (txn, errorPointer) -> Any? in
+                                let snap: DocumentSnapshot
+                                do { snap = try txn.getDocument(ref) } catch {
+                                    errorPointer?.pointee = error as NSError
+                                    return nil
+                                }
+
+                                var ids = (snap.get("challengeIDs") as? [String]) ?? []
+                                if !ids.contains(cid) && ids.count < 3 {
+                                    ids.append(cid)
+                                    txn.updateData(["challengeIDs": ids], forDocument: ref)
+                                } else if ids.count >= 3 {
+                                    errorPointer?.pointee = NSError(
+                                        domain: "LinkChallenges",
+                                        code: 1,
+                                        userInfo: [NSLocalizedDescriptionKey: "Event is at capacity."]
+                                    )
+                                    return nil
+                                }
+                                return nil
+                            }) { _, err in
+                                if let err = err {
+                                    print("Transaction failed: \(err.localizedDescription)")
+                                    return
+                                }
+
+                                // 1) Persist the accepted challenge with eventID
+                                if let ch = pendingAccepted.first(where: { $0.id == cid }) {
+                                    var linked = ch
+                                    linked.eventID = eid
+                                    saveAcceptedChallenge(linked, eventID: eid)
+                                }
+
+                                // 2) 🔥 Remove locally from AI lists so Challenge/Training tabs hide it immediately
+                                if let idx = aiRewardChallenges.firstIndex(where: { $0.id == cid }) {
+                                    aiRewardChallenges.remove(at: idx)
+                                }
+                                if let idxT = aiTrainingChallenges.firstIndex(where: { $0.id == cid }) {
+                                    aiTrainingChallenges.remove(at: idxT)
+                                }
+
+                                // 3) 🔑 Flip source feed state so Firestore-backed feeds (Sponsored) hide it
+                                // AthleteHomeView – after linking (pairs loop)
+                                if let uid = userID {
+                                  db.collection("users").document(uid)
+                                    .collection("challenges")                // the same feed path your VM listens to
+                                    .document(cid)
+                                    .setData([
+                                      "state": "inProgress",                 // not "available"
+                                      "eventID": eid
+                                    ], merge: true)
+                                }
+
+
+                                // 4) Optionally refresh events
+                                loadEvents()
+                            }
+                        }
+
+                        // Close after linking all
+                        navigateToLinkDetails = false
+                        showChallengeLink = false
+                    },
                     onConfirmLink: {
-                        // Commit your link action here if needed
                         navigateToLinkDetails = false
                         showChallengeLink = false
                     },
                     onClear: {
                         withAnimation { pendingAccepted.removeAll() }
-                        navigateToLinkDetails = false
-                        showChallengeLink = false
+                    },
+                    onUnaccept: { cid, eid in
+                        unacceptChallenge(challengeID: cid, eventID: eid)
                     }
                 )
                 .interactiveDismissDisabled(false)
@@ -325,6 +398,7 @@ struct AthleteHomeView: View {
             ]
             title = trainingTitles.randomElement()!
         } else {
+            // Challenge tab suggestions (non-sponsored) → points only
             let rewardTitles = [
                 "Score a Home Run",
                 "Get 5 Strikeouts",
@@ -338,14 +412,6 @@ struct AthleteHomeView: View {
 
         let difficulty = Difficulty.allCases.randomElement() ?? .easy
 
-        let rewardCash: Double? = {
-            switch difficulty {
-            case .easy:   return type == .reward ? 5  : nil
-            case .medium: return type == .reward ? 10 : nil
-            case .hard:   return type == .reward ? 20 : nil
-            }
-        }()
-
         let rewardPoints: Int = {
             switch difficulty {
             case .easy:   return 100
@@ -353,6 +419,9 @@ struct AthleteHomeView: View {
             case .hard:   return 500
             }
         }()
+
+        // No cash for non-sponsored suggestions and training
+        let cashForThis: Double? = (type == .training) ? nil : nil
 
         let category: ChallengeCategory = {
             if title.contains("Run") { return .baseRunning }
@@ -367,7 +436,7 @@ struct AthleteHomeView: View {
             title: title,
             type: type,
             difficulty: difficulty,
-            rewardCash: rewardCash,
+            rewardCash: cashForThis,
             rewardPoints: rewardPoints,
             timeRemaining: Double.random(in: 1...3) * 86_400,
             state: .available
@@ -417,7 +486,34 @@ struct AthleteHomeView: View {
         )
     }
 
-    // MARK: — Accept logic
+    // Overload used elsewhere when you already have a DocumentSnapshot
+    private func parseEventDocument(_ doc: DocumentSnapshot) -> Event? {
+        let d = doc.data() ?? [:]
+        guard
+            let title = d["title"] as? String,
+            let homeTeam = d["homeTeam"] as? String,
+            let awayTeam = d["awayTeam"] as? String,
+            let ts = d["startAt"] as? Timestamp
+        else { return nil }
+
+        let start = ts.dateValue()
+        let endDate: Date = (d["endDate"] as? Timestamp)?.dateValue()
+            ?? (Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: start) ?? start)
+        let ids = (d["challengeIDs"] as? [String]) ?? []
+
+        return Event(
+            id: doc.documentID,
+            title: title,
+            homeTeam: homeTeam,
+            awayTeam: awayTeam,
+            startAt: start,
+            endDate: endDate,
+            challengeIDs: ids
+        )
+    }
+
+    // MARK: — Accept logic (no auto-linking)
+
     private func acceptChallenge(_ challenge: Challenge) {
         guard let cid = challenge.id else { showToast("Missing ID"); return }
 
@@ -437,74 +533,12 @@ struct AthleteHomeView: View {
             }
         }
 
-        // TRAINING: never attach to an event
+        // Save with *no* event attached (user will link manually)
+        saveAcceptedChallenge(challenge, eventID: nil)
+
+        // Toast messaging
         if challenge.type == .training {
-            saveAcceptedChallenge(challenge, eventID: nil)
             showToast("Added to your training.")
-            return
-        }
-
-        // GAME (reward/sponsored): attach to earliest upcoming event
-        let candidates = events
-            .filter { $0.startAt >= Date() }
-            .sorted { $0.startAt < $1.startAt }
-
-        guard !candidates.isEmpty else {
-            cartVM.add(challenge)
-            showToast("No upcoming event available")
-            return
-        }
-
-        var chosenEventID: String?
-
-        db.runTransaction({ (transaction, errorPointer) -> Any? in
-            for ev in candidates {
-                guard let eid = ev.id else { continue }
-                let ref = db.collection("events").document(eid)
-
-                let snap: DocumentSnapshot
-                do { snap = try transaction.getDocument(ref) }
-                catch {
-                    errorPointer?.pointee = error as NSError
-                    return nil
-                }
-
-                var ids = (snap.get("challengeIDs") as? [String]) ?? []
-
-                if ids.contains(cid) { chosenEventID = eid; break }
-
-                // capacity check: max 3 challenges/event
-                if ids.count < 3 {
-                    ids.append(cid)
-                    transaction.updateData(["challengeIDs": ids], forDocument: ref)
-                    chosenEventID = eid
-                    break
-                }
-            }
-
-            if chosenEventID == nil {
-                errorPointer?.pointee = NSError(
-                    domain: "AcceptChallenge",
-                    code: 1,
-                    userInfo: [NSLocalizedDescriptionKey: "No upcoming event available"]
-                )
-            }
-            return chosenEventID as Any?
-        }) { result, error in
-            if let eid = result as? String {
-                if let idx = events.firstIndex(where: { $0.id == eid }) {
-                    if !events[idx].challengeIDs.contains(cid) {
-                        events[idx].challengeIDs.append(cid)
-                    }
-                    showToast("Challenge applied to \(events[idx].title).")
-                } else {
-                    showToast("Challenge applied.")
-                }
-                saveAcceptedChallenge(challenge, eventID: eid)
-            } else {
-                cartVM.add(challenge)
-                showToast(error?.localizedDescription ?? "No upcoming event available")
-            }
         }
     }
 
@@ -558,7 +592,8 @@ struct AthleteHomeView: View {
             "acceptedDate": Timestamp(date: Date())
         ]
         if let eid  = eventID { data["eventID"] = eid }
-        if let cash = c.rewardCash { data["rewardCash"] = cash }
+        // Only persist cash if it's a sponsored challenge
+        if c.type == .sponsored, let cash = c.rewardCash { data["rewardCash"] = cash }
         if let pts  = c.rewardPoints { data["rewardPoints"] = pts }
         if let secs = c.timeRemaining { data["timeRemaining"] = secs }
         if let start = c.startAt { data["startAt"] = Timestamp(date: start) }
@@ -605,31 +640,6 @@ struct AthleteHomeView: View {
         )
     }
 
-    private func parseEventDocument(_ doc: DocumentSnapshot) -> Event? {
-        let d = doc.data() ?? [:]
-        guard
-            let title = d["title"] as? String,
-            let homeTeam = d["homeTeam"] as? String,
-            let awayTeam = d["awayTeam"] as? String,
-            let ts = d["startAt"] as? Timestamp
-        else { return nil }
-
-        let start = ts.dateValue()
-        let endDate: Date = (d["endDate"] as? Timestamp)?.dateValue()
-            ?? (Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: start) ?? start)
-        let ids = (d["challengeIDs"] as? [String]) ?? []
-
-        return Event(
-            id: doc.documentID,
-            title: title,
-            homeTeam: homeTeam,
-            awayTeam: awayTeam,
-            startAt: start,
-            endDate: endDate,
-            challengeIDs: ids
-        )
-    }
-
     // MARK: — Toast
 
     private func showToast(_ message: String) {
@@ -640,24 +650,21 @@ struct AthleteHomeView: View {
         }
     }
 
-    // MARK: — Banner helpers (maps pendingAccepted → [ChallengeLink])
+    // MARK: — Banner helpers
 
     private func linkModels() -> [ChallengeLink] {
         pendingAccepted.map { ch in
-            let (url, asset) = challengeBackground(for: ch)
+            // $ if any cash OR if it's sponsored; else star
+            let hasCash = (ch.rewardCash ?? 0) > 0 || ch.type == .sponsored
             return ChallengeLink(
                 id: ch.id ?? UUID().uuidString,
-                imageURL: url,
-                imageName: asset,
+                imageURL: nil,
+                imageName: nil,
                 initials: initialsFromTitle(ch.title),
-                accentSymbolName: "bolt.fill"
+                accentSymbolName: nil,
+                isCash: hasCash
             )
         }
-    }
-
-    /// Default to a bundled asset; fallback is initials bubble
-    private func challengeBackground(for challenge: Challenge) -> (URL?, String?) {
-        return (nil, "challenge_default")
     }
 
     private func initialsFromTitle(_ title: String) -> String {
@@ -672,13 +679,28 @@ struct AthleteHomeView: View {
         if let today = events
             .filter({ cal.isDateInToday($0.startAt) })
             .sorted(by: { $0.startAt < $1.startAt })
-            .first {
-            return today
-        }
+            .first { return today }
         return events
             .filter({ $0.startAt > Date() })
             .sorted(by: { $0.startAt < $1.startAt })
             .first
+    }
+}
+
+// Small helper for the empty hero state
+private struct ZstackNoScheduled: View {
+    var body: some View {
+        ZStack {
+            Image("UpcomingGame")
+                .resizable()
+                .scaledToFill()
+                .clipped()
+            Text("No scheduled events")
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding(.horizontal, 16)
+                .shadow(radius: 4)
+        }
     }
 }
 

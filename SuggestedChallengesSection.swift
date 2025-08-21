@@ -5,18 +5,18 @@ struct SuggestedChallengesSection: View {
     @Binding var selectedFilter: SuggestedFilter
     let headerType: String
     let onClaim: (Challenge) -> Void
-
+    
     // Optional onShowMore closure to show the "Show More" button only if this is set
     let onShowMore: (() -> Void)?
-
+    
     // Optional custom builder for ChallengeCardView (returning AnyView to erase type)
     var challengeCardViewBuilder: ((Challenge, @escaping (Challenge) -> Void) -> AnyView)? = nil
-
+    
     private let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -39,7 +39,7 @@ struct SuggestedChallengesSection: View {
                 }
             }
             .padding(.horizontal, 4)
-
+            
             LazyVGrid(columns: columns, spacing: 16) {
                 // ✅ Use stable identity so cells don't get reused for different items
                 ForEach(filteredChallenges, id: \.id) { ch in
@@ -59,7 +59,7 @@ struct SuggestedChallengesSection: View {
             }
         }
     }
-
+    
     private var filteredChallenges: [Challenge] {
         let filtered = challenges.filter { ch in
             switch headerType {
@@ -71,14 +71,14 @@ struct SuggestedChallengesSection: View {
             }
         }
         switch headerType {
-        case "sponsored": return Array(filtered.prefix(4))
+        case "sponsored": return filtered   // no limit
         case "rewards":   return Array(filtered.prefix(8))
         case "training":  return Array(filtered.prefix(8))
         case "event":     return Array(filtered.prefix(4))
         default:          return []
         }
     }
-
+    
     private var sectionTitle: String {
         switch headerType {
         case "sponsored": return "Sponsored Challenges"
@@ -88,13 +88,17 @@ struct SuggestedChallengesSection: View {
         default:          return "Challenges"
         }
     }
-
+    
     private var shouldShowMoreButton: Bool {
-        if headerType == "sponsored" {
-            // Show if one or more sponsored challenges exist in full challenge list
-            return challenges.contains(where: { $0.type == .sponsored })
+        // Only show when a handler exists AND it's not the sponsored section
+        guard onShowMore != nil else { return false }
+        switch headerType {
+        case "rewards", "training", "event":
+            return true
+        case "sponsored":
+            return false
+        default:
+            return false
         }
-        // For other types, show only if onShowMore closure is provided
-        return onShowMore != nil
     }
 }

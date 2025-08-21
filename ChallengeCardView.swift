@@ -3,10 +3,14 @@ import SwiftUI
 struct ChallengeCardView: View {
     let challenge: Challenge
     let onClaim: (Challenge) -> Void
-    var fundButton: Bool = false            // sponsor context
-    var isFunded: Bool = false              // already funded in backend
-    var isSelected: Bool = false            // currently selected in sponsor's cart
 
+    // Context flags
+    var fundButton: Bool = false          // sponsor context
+    var isFunded: Bool = false            // already funded in backend
+    var isSelected: Bool = false          // in sponsor cart
+    var showCash: Bool = true             // <<< the ONLY switch for showing cash
+
+    // If a sponsored item didn’t come with cash, default by difficulty (sponsor side)
     private var defaultCashFromDifficulty: Int {
         switch challenge.difficulty {
         case .easy:   return 5
@@ -15,20 +19,12 @@ struct ChallengeCardView: View {
         }
     }
 
-    private var isSponsoredOrFunded: Bool {
-        (challenge.type == .sponsored) || isFunded || fundButton
-    }
-
-    private var cashDisplay: Int {
-        if let rc = challenge.rewardCash, rc > 0 { return Int(rc) }
-        return defaultCashFromDifficulty
-    }
-
+    // What the CTA should say
     private var buttonTitle: String {
         if fundButton {
-            if isFunded { return "Funded" }       // locked (already funded in backend)
-            if isSelected { return "Remove" }     // in cart
-            return "Fund"                         // not in cart
+            if isFunded { return "Funded" }
+            if isSelected { return "Remove" }
+            return "Fund"
         } else {
             return isFunded ? "Remove" : "Accept"
         }
@@ -39,9 +35,25 @@ struct ChallengeCardView: View {
             if isFunded { return .gray }
             return isSelected ? Color(red: 0.93, green: 0.87, blue: 0.74) : .brown
         } else {
-            return isFunded
-                ? Color(red: 0.93, green: 0.87, blue: 0.74)
-                : .brown
+            return isFunded ? Color(red: 0.93, green: 0.87, blue: 0.74) : .brown
+        }
+    }
+
+    // Single source of truth for the reward line
+    private var rewardLine: String {
+        let pts = challenge.rewardPoints ?? 0
+
+        // If we’re NOT supposed to show cash (Challenge/Training tabs),
+        // always return points-only.
+        guard showCash else { return "\(pts) pts" }
+
+        // Otherwise (Sponsored tab), show cash + points.
+        let cash = Int(challenge.rewardCash ?? 0)
+        if cash > 0 {
+            return "$\(cash) + \(pts) pts"
+        } else {
+            // Sponsored but no explicit cash — fall back by difficulty.
+            return "$\(defaultCashFromDifficulty) + \(pts) pts"
         }
     }
 
@@ -72,27 +84,18 @@ struct ChallengeCardView: View {
                 .lineLimit(1)
                 .padding(.horizontal, 8)
 
-            // Reward line
-            let pts = challenge.rewardPoints ?? 0
-            if isSponsoredOrFunded {
-                Text("$\(cashDisplay) +\(pts) pts")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 8)
-            } else {
-                Text("\(pts) pts")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 8)
-            }
+            // Reward
+            Text(rewardLine)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 8)
 
             Spacer(minLength: 8)
 
             // Action button
             Button(action: {
-                // If already funded in backend, do nothing (locked)
-                guard !(fundButton && isFunded) else { return }
-                onClaim(challenge)  // toggles cart selection
+                guard !(fundButton && isFunded) else { return } // lock if already funded
+                onClaim(challenge)
             }) {
                 Text(buttonTitle)
                     .fontWeight(.semibold)

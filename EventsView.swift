@@ -27,9 +27,27 @@ struct EventsView: View {
     private let db = Firestore.firestore()
     private let userID = Auth.auth().currentUser?.uid
 
-    private var challengesByEventID: [String: [Challenge]] {
-        Dictionary(grouping: acceptedChallenges, by: { $0.eventID ?? "" })
+    // MARK: – Derived helpers
+
+    private func challengesForEvent(_ evt: Event) -> [Challenge] {
+        // Prefer matching by eventID on the challenge doc
+        let eid = evt.id
+        let byEventID = self.acceptedChallenges.filter { $0.eventID == eid }
+        if !byEventID.isEmpty { return byEventID }
+
+        // Fallback: match by event.challengeIDs array
+        let idSet = Set(evt.challengeIDs)
+        return self.acceptedChallenges.filter { ch in
+            guard let cid = ch.id else { return false }
+            return idSet.contains(cid)
+        }
     }
+
+    private var challengesByEventID: [String: [Challenge]] {
+        let linked = acceptedChallenges.filter { $0.eventID != nil }
+        return Dictionary(grouping: linked, by: { $0.eventID! })
+    }
+
     private var eventsByDate: [Date: [Event]] {
         Dictionary(grouping: userEvents, by: { calendar.startOfDay(for: $0.startAt) })
     }
@@ -46,6 +64,8 @@ struct EventsView: View {
     private let timeFormatter: DateFormatter = {
         let f = DateFormatter(); f.dateFormat = "h:mm a"; return f
     }()
+
+    // MARK: – Body
 
     var body: some View {
         NavigationStack {
@@ -128,8 +148,18 @@ struct EventsView: View {
                 }
             }
             .onAppear {
-                loadUserEvents()
-                loadAcceptedChallenges()
+                // Load events + accepted, then sweep for unsubmitted after 5 days
+                let group = DispatchGroup()
+
+                group.enter()
+                loadUserEvents { group.leave() }
+
+                group.enter()
+                loadAcceptedChallenges { group.leave() }
+
+                group.notify(queue: .main) {
+                    sweepExpiredUnsubmitted() // 🔁 rule (3)
+                }
             }
             // Tick 'now' every 15s so cards flip state automatically when event time passes
             .onReceive(Timer.publish(every: 15, on: .main, in: .common).autoconnect()) { tick in
@@ -137,7 +167,6 @@ struct EventsView: View {
             }
             .navigationTitle("Events")
             .navigationBarTitleDisplayMode(.inline)
-            // Same subtle background as Leaderboard/MyChallenges
             .background(
                 Image("leaderboard_bg")
                     .resizable()
@@ -149,6 +178,7 @@ struct EventsView: View {
     }
 
     // MARK: – Selected day card
+
     private var selectedDayCard: some View {
         VStack(alignment: .leading, spacing: 6) {
             if let date = selectedDate {
@@ -164,25 +194,24 @@ struct EventsView: View {
                                 .font(.headline)
                                 .foregroundColor(.black)
 
-                            let chs = challengesByEventID[evt.id ?? ""] ?? []
+                            let chs = challengesForEvent(evt)
                             if !chs.isEmpty {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Challenges:")
                                         .font(.subheadline).bold()
                                     VStack(alignment: .leading, spacing: 0) {
-                                        ForEach(Array(chs.prefix(3).enumerated()), id: \.1.id) { index, c in
+                                        ForEach(Array(chs.enumerated()), id: \.offset) { index, c in
                                             HStack(spacing: 8) {
                                                 HStack(spacing: 6) {
                                                     Text("• \(c.title)")
-                                                    if let cash = c.rewardCash { Text(String(format: "$%.2f", cash)) }
-                                                    if let pts = c.rewardPoints { Text("+\(pts) pts") }
+                                                    if let cash = c.rewardCash, cash > 0 { Text(String(format: "$%.2f", cash)) }
+                                                    if let pts = c.rewardPoints, pts > 0 { Text("+\(pts) pts") }
                                                 }
                                                 .lineLimit(1)
                                                 .truncationMode(.tail)
 
                                                 Spacer(minLength: 8)
 
-                                                // Hide delete once the event has started (lock challenges)
                                                 if !hasStarted {
                                                     Button {
                                                         removeChallenge(c, from: evt)
@@ -198,7 +227,7 @@ struct EventsView: View {
                                             .foregroundColor(.gray)
                                             .padding(.vertical, 6)
 
-                                            if index < chs.prefix(3).count - 1 {
+                                            if index < chs.count - 1 {
                                                 Divider().padding(.vertical, 4)
                                             }
                                         }
@@ -213,7 +242,7 @@ struct EventsView: View {
                                     matching: .images,
                                     photoLibrary: .shared()
                                 ) {
-                                    Label("Upload Results for Event", systemImage: "square.and.arrow.up")
+                                    Label("Upload Results for this Event", systemImage: "square.and.arrow.up")
                                         .font(.subheadline.bold())
                                         .frame(maxWidth: .infinity)
                                         .padding(8)
@@ -223,7 +252,9 @@ struct EventsView: View {
                                 }
                                 .onChange(of: pickedItems) { _ in
                                     uploadForEvent = evt
-                                    // TODO: Handle upload (Storage + link under evt.id)
+                                    // TODO: Upload to Storage and write a submission doc under:
+                                    // users/{uid}/submissions/{challengeId or eventId_challengeId}
+                                    // with fields: { status: "pending", eventID, challengeID, uploadedAt }
                                 }
                                 .padding(.top, 8)
                             }
@@ -308,8 +339,10 @@ struct EventsView: View {
         db.collection("events").document(eid).setData(data) { err in
             if let e = err { print("Error: \(e)") }
             else {
-                userEvents.append(newEvent)
-                calendarRefreshID = UUID()
+                DispatchQueue.main.async {
+                    userEvents.append(newEvent)
+                    calendarRefreshID = UUID()
+                }
             }
         }
     }
@@ -322,42 +355,137 @@ struct EventsView: View {
         let eid = event.id ?? challenge.eventID
 
         // Optimistic UI
-        acceptedChallenges.removeAll { $0.id == cid }
-        if let eid = eid, let eidx = userEvents.firstIndex(where: { $0.id == eid }) {
-            userEvents[eidx].challengeIDs.removeAll { $0 == cid }
+        DispatchQueue.main.async {
+            acceptedChallenges.removeAll { $0.id == cid }
+            if let eid = eid, let eidx = userEvents.firstIndex(where: { $0.id == eid }) {
+                userEvents[eidx].challengeIDs.removeAll { $0 == cid }
+            }
         }
 
-        // Firestore removes
+        // Remove from user's accepted list
         if let uid = userID {
             db.collection("users").document(uid)
-                .collection("acceptedChallenges").document(cid)
-                .delete { err in
-                    if let err = err { print("Remove (user) failed: \(err)") }
-                }
+              .collection("acceptedChallenges").document(cid)
+              .delete { err in
+                  if let err = err { print("Remove (user) failed: \(err)") }
+              }
+
+            // 🔁 Make it AVAILABLE again in the sponsored feed
+            db.collection("users").document(uid)
+              .collection("challenges")
+              .document(cid)
+              .setData([
+                  "state": "available",
+                  "eventID": FieldValue.delete()
+              ], merge: true)
         }
+
+        // Detach from event’s challengeIDs array
         if let eid = eid {
             db.collection("events").document(eid)
-                .updateData(["challengeIDs": FieldValue.arrayRemove([cid])]) { err in
-                    if let err = err { print("Remove (event) failed: \(err)") }
-                }
+              .updateData(["challengeIDs": FieldValue.arrayRemove([cid])]) { err in
+                  if let err = err { print("Remove (event) failed: \(err)") }
+              }
         }
     }
 
-    private func loadUserEvents() {
+    // MARK: – Loaders (with completion)
+
+    private func loadUserEvents(completion: (() -> Void)? = nil) {
         db.collection("events").getDocuments { snap, err in
+            defer { completion?() }
             if let e = err { print("Error: \(e)") ; return }
-        userEvents = snap?.documents.compactMap { parseEventData($0.data()) } ?? []
-            calendarRefreshID = UUID()
+            let events = snap?.documents.compactMap { parseEventData($0.data()) } ?? []
+            DispatchQueue.main.async {
+                userEvents = events
+                calendarRefreshID = UUID()
+            }
         }
     }
 
-    private func loadAcceptedChallenges() {
-        guard let uid = userID else { return }
+    private func loadAcceptedChallenges(completion: (() -> Void)? = nil) {
+        guard let uid = userID else { completion?(); return }
         db.collection("users").document(uid)
           .collection("acceptedChallenges")
           .getDocuments { snap, err in
-            if let e = err { print("Error: \(e)"); return }
-            acceptedChallenges = snap?.documents.compactMap { parseChallengeData($0.data()) } ?? []
+              defer { completion?() }
+              if let e = err { print("Error: \(e)"); return }
+              let challenges = snap?.documents.compactMap { parseChallengeData($0.data()) } ?? []
+              DispatchQueue.main.async {
+                  acceptedChallenges = challenges
+              }
+          }
+    }
+
+    // MARK: – Rule (3): recycle after 5 days if no accepted/pending submission
+
+    private func sweepExpiredUnsubmitted() {
+        guard let uid = userID else { return }
+
+        // Anything with event.endDate earlier than 5 days ago
+        let cutoff = Calendar.current.date(byAdding: .day, value: -5, to: Date()) ?? Date()
+
+        // Build quick lookup for events
+        let eventsById: [String: Event] = Dictionary(uniqueKeysWithValues:
+            userEvents.compactMap { e in
+                guard let id = e.id else { return nil }
+                return (id, e)
+            }
+        )
+
+        // Linked challenges only
+        let linked = acceptedChallenges.filter { $0.eventID != nil }
+
+        for ch in linked {
+            guard
+                let cid = ch.id,
+                let eid = ch.eventID,
+                let evt = eventsById[eid],
+                evt.endDate < cutoff
+            else { continue }
+
+            // Check submission status (adjust collection/key if needed)
+            let subRef = db.collection("users").document(uid)
+                .collection("submissions")
+                .document(cid)   // or "\(eid)_\(cid)" if that’s your key
+
+            subRef.getDocument { snap, _ in
+                let status = (snap?.data()?["status"] as? String) ?? "missing"
+                let accepted = status == "accepted"
+                let pending  = status == "pending"
+
+                // Only recycle if nothing accepted/pending
+                if !accepted && !pending {
+                    // 1) Flip feed item back to available so it shows in Sponsored
+                    db.collection("users").document(uid)
+                      .collection("challenges")
+                      .document(cid)
+                      .setData([
+                          "state": "available",
+                          "eventID": FieldValue.delete()
+                      ], merge: true)
+
+                    // 2) Remove from user's accepted list
+                    db.collection("users").document(uid)
+                      .collection("acceptedChallenges")
+                      .document(cid)
+                      .delete()
+
+                    // 3) Detach from event doc
+                    db.collection("events").document(eid)
+                      .updateData(["challengeIDs": FieldValue.arrayRemove([cid])]) { err in
+                          if let err = err { print("Detach from event failed: \(err)") }
+                      }
+
+                    // 4) Update local state optimistically
+                    DispatchQueue.main.async {
+                        acceptedChallenges.removeAll { $0.id == cid }
+                        if let eidx = userEvents.firstIndex(where: { $0.id == eid }) {
+                            userEvents[eidx].challengeIDs.removeAll { $0 == cid }
+                        }
+                    }
+                }
+            }
         }
     }
 

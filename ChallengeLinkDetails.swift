@@ -2,27 +2,38 @@ import SwiftUI
 
 struct ChallengeLinkDetails: View {
     @Environment(\.dismiss) private var dismiss
+
+    // Selected challenges (binding from parent)
     @Binding var selectedChallenges: [Challenge]
 
-    var targetEventTitle: String? = nil
+    // Only pass future events with capacity from the parent
+    var upcomingEvents: [Event]
+
+    // Callbacks
+    var onLinkSelection: (([(challengeId: String, eventId: String)]) -> Void)? = nil
     var onConfirmLink: (() -> Void)? = nil
     var onClear: (() -> Void)? = nil
 
-    // MARK: - Derived
-    private var multiplierText: String {
-        let c = max(0, selectedChallenges.count)
-        guard c > 0 else { return "—" }
-        let mult = 1.2 + Double(max(0, c - 1)) * 0.4
-        return String(format: "%.1fx", mult)
+    // Notify parent to truly unaccept (removes from acceptedChallenges so card reverts to "Accept")
+    var onUnaccept: ((String, String?) -> Void)? = nil   // (challengeID, eventID)
+
+    // Track which event each challenge is linked to (locally in this sheet)
+    @State private var selectedEventIdByChallenge: [String: String] = [:]
+
+    // MARK: - Totals
+    private var totalCash: Int {
+        selectedChallenges.reduce(0) { $0 + Int($1.rewardCash ?? 0) }
+    }
+    private var totalPoints: Int {
+        selectedChallenges.reduce(0) { $0 + ($1.rewardPoints ?? 0) }
     }
 
     var body: some View {
-        NavigationStack {                       // << make sure we have a nav container
+        NavigationStack {
             VStack(spacing: 16) {
                 // HEADER
                 HStack {
-                    Text("Review Challenges")
-                        .font(.title3.bold())
+                    Text("Review Challenges").font(.title3.bold())
                     Spacer()
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -42,11 +53,21 @@ struct ChallengeLinkDetails: View {
                 } else {
                     List {
                         ForEach(selectedChallenges, id: \.id) { ch in
-                            ChallengeRow(ch: ch) {
-                                withAnimation {
-                                    selectedChallenges.removeAll { $0.id == ch.id }
+                            ChallengeRow(
+                                ch: ch,
+                                selectedEventId: bindingForEventId(ch.id),
+                                upcomingEvents: upcomingEvents,
+                                onRemove: {
+                                    withAnimation {
+                                        selectedChallenges.removeAll { $0.id == ch.id }
+                                        if let id = ch.id { selectedEventIdByChallenge[id] = nil }
+                                    }
+                                    // tell parent to unaccept so card flips back to "Accept"
+                                    if let id = ch.id {
+                                        onUnaccept?(id, ch.eventID)
+                                    }
                                 }
-                            }
+                            )
                             .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
                             .listRowSeparator(.hidden)
                         }
@@ -55,34 +76,27 @@ struct ChallengeLinkDetails: View {
 
                     // ACTIONS
                     VStack(spacing: 16) {
-                        Button {
-                            // Optionally navigate back to add more picks
-                        } label: {
-                            HStack(spacing: 10) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 18, weight: .bold))
-                                Text("Add Pick for \(multiplierText) Multiplier")
-                                    .font(.subheadline.bold())
-                            }
-                            .padding(.vertical, 14)
-                            .frame(maxWidth: .infinity)
-                            .background(
-                                Capsule()
-                                    .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
-                                    .background(Capsule().fill(Color.black.opacity(0.15)))
-                            )
-                        }
-
                         Button(role: .destructive) {
+                            // notify parent for each removed challenge (include eventID)
+                            selectedChallenges.forEach { ch in
+                                if let id = ch.id { onUnaccept?(id, ch.eventID) }
+                            }
+
                             if let onClear {
                                 onClear()
                             } else {
-                                withAnimation { selectedChallenges.removeAll() }
+                                withAnimation {
+                                    selectedChallenges.removeAll()
+                                    selectedEventIdByChallenge.removeAll()
+                                }
                             }
                         } label: {
                             Text("Clear Picks")
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.red.opacity(0.1))
+                                .cornerRadius(10)
                         }
                         .padding(.top, 4)
                     }
@@ -91,16 +105,37 @@ struct ChallengeLinkDetails: View {
 
                 // SUMMARY
                 if !selectedChallenges.isEmpty {
-                    SummaryCard(
-                        eventTitle: targetEventTitle,
-                        multiplierText: multiplierText
-                    )
-                    .padding(.horizontal)
+                    SummaryCard(totalCash: totalCash, totalPoints: totalPoints)
+                        .padding(.horizontal)
                 }
 
-                // CONFIRM
+                // CONFIRM (links each chosen challenge to the chosen event)
                 if !selectedChallenges.isEmpty {
                     Button {
+                        // Build mapping (challengeId → eventId) for rows where the user chose an event
+                        let pairs: [(String, String)] = selectedChallenges.compactMap { ch in
+                            guard let cid = ch.id,
+                                  let eid = selectedEventIdByChallenge[cid],
+                                  !eid.isEmpty
+                            else { return nil }
+                            return (cid, eid)
+                        }
+
+                        // 1) Let parent write to Firestore
+                        onLinkSelection?(pairs)
+
+                        // 2) Remove only the linked ones from the sheet (and parent via binding)
+                        let linkedIDs = Set(pairs.map { $0.0 })
+                        withAnimation {
+                            selectedChallenges.removeAll { ch in
+                                guard let id = ch.id else { return false }
+                                return linkedIDs.contains(id)
+                            }
+                            // clear local selections for those we removed
+                            linkedIDs.forEach { selectedEventIdByChallenge[$0] = nil }
+                        }
+
+                        // 3) Optional existing hook (e.g., close the sheet/banners)
                         onConfirmLink?()
                     } label: {
                         VStack(spacing: 2) {
@@ -123,10 +158,8 @@ struct ChallengeLinkDetails: View {
             .navigationTitle("ChallengeLink")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {   // top-right close
-                    Button {
-                        dismiss()
-                    } label: {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { dismiss() } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title2.bold())
                             .foregroundColor(.secondary)
@@ -134,14 +167,37 @@ struct ChallengeLinkDetails: View {
                 }
             }
             .background(Color(.systemBackground))
+            .onAppear {
+                // Pre-load selections from the challenge if it already has an eventID
+                for ch in selectedChallenges {
+                    if let cid = ch.id, let eid = ch.eventID {
+                        selectedEventIdByChallenge[cid] = eid
+                    }
+                }
+            }
         }
+    }
+
+    // Make a binding to the selected event id for a specific challenge
+    private func bindingForEventId(_ challengeId: String?) -> Binding<String?> {
+        Binding<String?>(
+            get: { challengeId.flatMap { selectedEventIdByChallenge[$0] } },
+            set: { newValue in
+                guard let id = challengeId else { return }
+                selectedEventIdByChallenge[id] = newValue
+            }
+        )
     }
 }
 
 // MARK: - Row
 private struct ChallengeRow: View {
     let ch: Challenge
+    @Binding var selectedEventId: String?
+    var upcomingEvents: [Event]
     var onRemove: () -> Void
+
+    @State private var showEventPicker = false
 
     private var rewardText: String {
         let cash = ch.rewardCash ?? 0
@@ -151,27 +207,46 @@ private struct ChallengeRow: View {
         return "+\(pts) pts"
     }
 
+    private func eventTitle(for id: String?) -> String? {
+        guard let id else { return nil }
+        return upcomingEvents.first(where: { $0.id == id })?.title
+    }
+
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            ChallengeAvatar()
+            ChallengeAvatar(ch: ch)
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(ch.title)
-                        .font(.headline)
-                        .lineLimit(1)
-                    Spacer()
+            VStack(alignment: .leading, spacing: 6) {
+                Text(ch.title)
+                    .font(.headline)
+                    .lineLimit(1)
+
+                Button {
+                    showEventPicker = true
+                } label: {
+                    Text(buttonLabel)
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color(.secondarySystemBackground))
+                        )
+                        .foregroundColor(selectedEventId == nil ? .blue : .green)
                 }
-
-                if let eventName = ch.eventID, !eventName.isEmpty {
-                    Text("Linked: \(eventName)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                } else {
-                    Text("Not linked yet")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                .buttonStyle(.plain)
+                .confirmationDialog("Select Event", isPresented: $showEventPicker, titleVisibility: .visible) {
+                    if upcomingEvents.isEmpty {
+                        Button("No upcoming events to link") { }
+                    } else {
+                        ForEach(upcomingEvents, id: \.id) { event in
+                            Button(event.title) {
+                                selectedEventId = event.id
+                            }
+                        }
+                        Button("Cancel", role: .cancel) { }
+                    }
                 }
 
                 Text(rewardText)
@@ -191,58 +266,75 @@ private struct ChallengeRow: View {
         }
         .contentShape(Rectangle())
     }
+
+    private var buttonLabel: String {
+        if let title = eventTitle(for: selectedEventId) {
+            return "Linked to \(title)"
+        } else if upcomingEvents.isEmpty {
+            return "No upcoming events to link"
+        } else {
+            return "Link to an event"
+        }
+    }
 }
 
-// MARK: - Avatar (default image only)
+// MARK: - Avatar
 private struct ChallengeAvatar: View {
+    let ch: Challenge
+
+    private var isCashChallenge: Bool {
+        (ch.rewardCash ?? 0) > 0
+    }
+
     var body: some View {
-        Group {
-            if let img = UIImage(named: "challenge_default") {
-                Image(uiImage: img)
+        ZStack {
+            Circle()
+                .fill(Color.blue.opacity(0.15)) // background circle
+                .frame(width: 52, height: 52)
+
+            if isCashChallenge {
+                Image(systemName: "dollarsign.circle.fill")
                     .resizable()
-                    .scaledToFill()
+                    .scaledToFit()
+                    .frame(width: 32, height: 32)
+                    .foregroundColor(.green)
             } else {
-                Color.gray.opacity(0.2)
-                    .overlay(
-                        Image(systemName: "sportscourt.fill")
-                            .imageScale(.large)
-                            .opacity(0.6)
-                    )
+                Image(systemName: "star.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 28, height: 28)
+                    .foregroundColor(.yellow)
             }
         }
-        .frame(width: 52, height: 52)
-        .clipShape(Circle())
-        .overlay(Circle().strokeBorder(Color.white.opacity(0.8), lineWidth: 2))
+        .overlay(
+            Circle()
+                .strokeBorder(Color.white.opacity(0.8), lineWidth: 2)
+        )
         .shadow(radius: 1)
     }
 }
 
+
 // MARK: - Summary
 private struct SummaryCard: View {
-    var eventTitle: String?
-    var multiplierText: String
+    var totalCash: Int
+    var totalPoints: Int
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Prizing & Link Summary")
-                .font(.headline)
-
-            if let eventTitle {
-                HStack {
-                    Text("Target Event")
-                    Spacer()
-                    Text(eventTitle).bold()
-                }
-                .font(.subheadline)
-            }
+            Text("Prizing & Link Summary").font(.headline)
 
             HStack {
-                Text("Multiplier")
+                Text("Total Cash Value")
                 Spacer()
-                Text(multiplierText)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(RoundedRectangle(cornerRadius: 8).fill(Color.orange.opacity(0.15)))
+                Text("$\(totalCash)").bold()
+            }
+            .font(.subheadline)
+
+            HStack {
+                Text("Total Points Value")
+                Spacer()
+                Text("+\(totalPoints) pts").bold()
             }
             .font(.subheadline)
 

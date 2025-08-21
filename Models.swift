@@ -144,6 +144,33 @@ struct Challenge: Identifiable, Codable, Equatable, Hashable {
     }
 }
 
+// MARK: - Custom Equatable/Hashable (id + type only)
+
+extension Challenge {
+    static func == (lhs: Challenge, rhs: Challenge) -> Bool {
+        lhs.id == rhs.id && lhs.type == rhs.type
+    }
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(type.rawValue)
+        hasher.combine(id ?? "")
+    }
+}
+
+// MARK: - Keys & Helpers
+
+extension Challenge {
+    /// Stable key used to compare across tabs/sources
+    var compositeKey: String? {
+        guard let id else { return nil }
+        return "\(type.rawValue)|\(id)"
+    }
+
+    /// Used for avatars: `$` if any cash (or sponsored), else `★`
+    var hasCashPrize: Bool {
+        (rewardCash ?? 0) > 0 || type == .sponsored
+    }
+}
+
 // MARK: - Challenge Image Mapping
 
 extension Challenge {

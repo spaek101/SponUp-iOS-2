@@ -25,8 +25,9 @@ struct SponsorHomeView: View {
 
     // Live funded source IDs for rendering “Funded” on cards
     @State private var fundedSourceIDs: Set<String> = []
-    private let fundedStates: [String] = ["selected", "inProgress"]
+    private let fundedStates: [String] = ["available", "selected", "inProgress"]  // include "available"
     @State private var fundedListenerRegs: [ListenerRegistration] = []
+
 
     // MARK: — Athletes (multi-select)
     @State private var athletes: [Athlete] = []
@@ -313,34 +314,26 @@ struct SponsorHomeView: View {
                 let challengeData: [String: Any] = [
                     "id": challengeDoc.documentID,
                     "title": ch.title,
-
-                    // enums as strings to match your filters/decoders
                     "category": ch.category.rawValue,
                     "type": ChallengeType.sponsored.rawValue,
                     "difficulty": ch.difficulty.rawValue,
 
-                    // funded state so it shows up live as sponsored
-                    "state": ChallengeState.selected.rawValue,
+                    // publish to athlete feed as available
+                    "state": ChallengeState.available.rawValue,  // ✅ NOW AVAILABLE
 
-                    // values
                     "rewardCash": cash,
                     "rewardPoints": ch.rewardPoints ?? 0,
-
-                    // images / timing (optional)
                     "imageName": ch.imageName,
                     "imageURL": ch.imageURL as Any? ?? NSNull(),
                     "timeRemaining": ch.timeRemaining as Any? ?? NSNull(),
-
-                    // linkage
                     "sponsorID": sponsor,
                     "sponsorName": userFullName,
                     "athleteID": athleteID,
                     "sourceChallengeID": cid,
-
-                    // timestamps
                     "createdAt": FieldValue.serverTimestamp(),
                     "fundedAt": FieldValue.serverTimestamp()
                 ]
+
 
                 batch.setData(challengeData, forDocument: challengeDoc)
 

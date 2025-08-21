@@ -24,11 +24,23 @@ struct HeroHeader: View {
                             .clipShape(RoundedRectangle(cornerRadius: 20))
                             .shadow(color: .black.opacity(0.12), radius: 5, x: 0, y: 3)
                     }
+
+                    // 👇 Always append the leaderboard card here
+                    NavigationLink {
+                        LeaderboardView()   // <-- your existing leaderboard screen
+                    } label: {
+                        ViewLeaderboard()
+                            .frame(width: cardW, height: cardH)
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                            .shadow(color: .black.opacity(0.12), radius: 5, x: 0, y: 3)
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 6) // keep this small to avoid extra gap
             }
-            .frame(height: cardH + 12)   // exact content height -> no leftover space
+            .frame(height: cardH + 12)
+
             .ifAvailableiOS17 { view in
                 view.scrollTargetLayout()
                     .scrollTargetBehavior(.viewAligned)
@@ -36,6 +48,7 @@ struct HeroHeader: View {
         }
         // ⛔️ No .frame(height:) out here – that’s what created the gap
     }
+    
     
     @ViewBuilder
     private func heroCard(for event: Event, cardHeight: CGFloat) -> some View {

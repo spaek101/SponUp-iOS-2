@@ -17,8 +17,13 @@ struct SponsoredTab: View {
     let onClaim: (Challenge) -> Void
 
     var body: some View {
-        // Fast lookup for accepted IDs so button text updates instantly
-        let acceptedIDs: Set<String> = Set(acceptedChallenges.compactMap { $0.id })
+        // Build a typed key set: "type|id"
+        let acceptedKeys: Set<String> = Set(
+            acceptedChallenges.compactMap { ch in
+                guard let id = ch.id else { return nil }
+                return "\(ch.type.rawValue)|\(id)"
+            }
+        )
 
         SuggestedChallengesSection(
             challenges: $challenges,
@@ -27,19 +32,23 @@ struct SponsoredTab: View {
             onClaim: onClaim,
             onShowMore: nil
         ) { challenge, onClaim in
-            AnyView(
+            let isFunded: Bool = {
+                guard let id = challenge.id else { return false }
+                let key = "\(challenge.type.rawValue)|\(id)"
+                return acceptedKeys.contains(key)
+            }()
+
+            return AnyView(
                 ChallengeCardView(
                     challenge: challenge,
                     onClaim: onClaim,
-                    fundButton: false,                              // athlete view → Accept/Remove
-                    isFunded: {
-                        guard let id = challenge.id else { return false }
-                        return acceptedIDs.contains(id)             // true → "Remove", false → "Accept"
-                    }(),
-                    isSelected: false                               // not a cart context here
+                    fundButton: false,        // athlete view → Accept/Remove
+                    isFunded: isFunded,       // uses typed key, no cross-tab bleed
+                    isSelected: false
                 )
             )
         }
-        .padding(.horizontal, 0) // keep consistent with other tabs
+        .padding(.horizontal, 0)
     }
 }
+

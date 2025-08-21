@@ -5,32 +5,37 @@
 //  Created by Steve Paek on 8/19/25.
 //
 
-
 import SwiftUI
 
 // MARK: - Lightweight view model the banner needs
 public struct ChallengeLink: Identifiable, Hashable {
     public let id: String
 
-    // Provide the same background you use on the challenge card:
-    public var imageURL: URL?       // e.g. https://.../challenge-bg.jpg
-    public var imageName: String?   // e.g. local asset name "bg_homeruns"
-    public var initials: String     // fallback text if no image
+    // Keep for flexibility, but not used in AvatarBubble anymore
+    public var imageURL: URL?
+    public var imageName: String?
+    public var initials: String
     public var accentSymbolName: String? = "bolt.fill"
+
+    // NEW: whether this challenge has cash
+    public var isCash: Bool = false
 
     public init(id: String,
                 imageURL: URL? = nil,
                 imageName: String? = nil,
                 initials: String,
-                accentSymbolName: String? = "bolt.fill") {
+                accentSymbolName: String? = "bolt.fill",
+                isCash: Bool = false) {
         self.id = id
         self.imageURL = imageURL
         self.imageName = imageName
         self.initials = initials
         self.accentSymbolName = accentSymbolName
+        self.isCash = isCash
     }
 }
 
+// MARK: - Banner
 public struct ChallengeLinkBanner: View {
     public var avatars: [ChallengeLink]
     public var headline: String = "Win 50x"
@@ -84,8 +89,11 @@ public struct ChallengeLinkBanner: View {
 
                 Button(action: { onPrimaryTap?() }) {
                     VStack(spacing: 2) {
-                        Text(headline).font(.system(size: 18, weight: .bold, design: .rounded))
-                        Text(subheadline).font(.system(size: 12, weight: .semibold, design: .rounded)).opacity(0.9)
+                        Text(headline)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                        Text(subheadline)
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .opacity(0.9)
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
@@ -101,18 +109,6 @@ public struct ChallengeLinkBanner: View {
         .frame(height: bannerHeight)
         .padding(.horizontal, 12)
         .padding(.bottom, 8)
-        .overlay(alignment: .topTrailing) {
-            if let onDismiss {
-                Button(action: onDismiss) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundStyle(.white.opacity(0.95))
-                        .shadow(radius: 2)
-                }
-                .padding(.trailing, 18)
-                .padding(.top, 6)
-            }
-        }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(avatars.count) challenges selected. \(headline) \(subheadline)")
     }
@@ -121,50 +117,27 @@ public struct ChallengeLinkBanner: View {
     private var remainingCount: Int { max(0, avatars.count - maxVisibleAvatars) }
 }
 
-// MARK: - Avatar bubble uses the challenge background image
+// MARK: - Avatar bubble (orange circle with $ or ⭐)
 private struct AvatarBubble: View {
     var avatar: ChallengeLink
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            avatarImage
+        ZStack {
+            Circle()
+                .fill(Color.orange)
                 .frame(width: 48, height: 48)
-                .clipShape(Circle())
-                .overlay(Circle().strokeBorder(Color.white.opacity(0.9), lineWidth: 2))
 
-            if let sym = avatar.accentSymbolName {
-                Image(systemName: sym)
-                    .font(.system(size: 11, weight: .bold))
-                    .padding(6)
-                    .background(Circle().fill(Color.white))
-                    .foregroundColor(.orange)
-                    .offset(x: 2, y: 2)
-            }
+            Image(systemName: avatar.isCash ? "dollarsign" : "star.fill")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(.white)
         }
+        .overlay(Circle().strokeBorder(Color.white.opacity(0.9), lineWidth: 2))
         .padding(.vertical, 8)
         .padding(.trailing, 6)
     }
-
-    // Shows URL image -> asset image -> initials fallback
-    @ViewBuilder
-    private var avatarImage: some View {
-        if let url = avatar.imageURL {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .success(let img): img.resizable().scaledToFill()
-                case .failure(_): InitialsView(text: avatar.initials)
-                case .empty: ProgressView().scaleEffect(0.8)
-                @unknown default: InitialsView(text: avatar.initials)
-                }
-            }
-        } else if let name = avatar.imageName {
-            Image(name).resizable().scaledToFill()
-        } else {
-            InitialsView(text: avatar.initials)
-        }
-    }
 }
 
+// MARK: - More bubble
 private struct MoreBubble: View {
     var count: Int
     var body: some View {
@@ -180,17 +153,5 @@ private struct MoreBubble: View {
             .padding(.vertical, 8)
             .padding(.trailing, 6)
             .accessibilityLabel("plus \(count) more")
-    }
-}
-
-private struct InitialsView: View {
-    var text: String
-    var body: some View {
-        ZStack {
-            LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing)
-            Text(text)
-                .font(.system(size: 16, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-        }
     }
 }

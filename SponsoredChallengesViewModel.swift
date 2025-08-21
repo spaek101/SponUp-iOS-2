@@ -9,9 +9,12 @@ final class SponsoredChallengesViewModel: ObservableObject {
 
     deinit { listener?.remove() }
 
+    /// Call onAppear with the current athlete's ID.
+    /// Feeds should come from a *sponsored feed* collection, not the user's accepted list.
     func start(for athleteID: String, useAltCollection: Bool = false) {
         listener?.remove()
 
+        // Choose feed path
         var col = db.collection("users")
             .document(athleteID)
             .collection("challenges")
@@ -21,24 +24,21 @@ final class SponsoredChallengesViewModel: ObservableObject {
                 .collection("sponsoredChallenges")
         }
 
-        // Strict query (fast, but needs a composite index)
+        // Only show AVAILABLE sponsored items
         let strictQ = col
             .whereField("type", isEqualTo: "sponsored")
-            .whereField("state", in: ["selected", "inProgress"])
-            .order(by: "fundedAt", descending: true) // use createdAt if you prefer
+            .whereField("state", isEqualTo: "available")
+            .order(by: "createdAt", descending: true)  // use "fundedAt" if you prefer
 
-        print("▶️ SponsoredVM.start athleteID=\(athleteID) useAlt=\(useAltCollection)")
         listener = strictQ.addSnapshotListener { [weak self] snap, err in
-            // Index missing? Fall back to simple query so UI still works now.
+            // Missing composite index? Fall back to a simpler query.
             if let ns = err as NSError?,
                ns.domain == FirestoreErrorDomain,
                ns.code == FirestoreErrorCode.failedPrecondition.rawValue,
                ns.localizedDescription.lowercased().contains("index") {
-                print("⚠️ Missing composite index — falling back to simple query (client filter/sort).")
                 self?.attachFallbackListener(col: col)
                 return
             }
-
             if let err = err {
                 print("❌ sponsored listener error:", err.localizedDescription)
                 return
@@ -47,12 +47,13 @@ final class SponsoredChallengesViewModel: ObservableObject {
         }
     }
 
+    /// Call onDisappear.
     func stop() {
         listener?.remove()
         listener = nil
     }
 
-    // MARK: - Fallback: type == sponsored only; filter/sort client-side
+    // MARK: - Fallback listener (no composite index)
     private func attachFallbackListener(col: CollectionReference) {
         listener?.remove()
         let q = col.whereField("type", isEqualTo: "sponsored")
@@ -64,23 +65,15 @@ final class SponsoredChallengesViewModel: ObservableObject {
             guard let self, let snap = snap else { return }
             var items = snap.documents.map { Challenge(from: $0) }
 
-            // Keep only funded states (selected / inProgress)
-            items = items.filter { ch in
-                ch.state == .selected || ch.state == .inProgress
-            }
+            // Keep only AVAILABLE items client-side
+            items = items.filter { $0.state == .available }
+            items.sort { ($0.createdAt ?? .distantPast) > ($1.createdAt ?? .distantPast) }
 
-            // Sort newest first (prefer fundedAt if you add it to your model; else createdAt)
-            items.sort { a, b in
-                let aDate = a.createdAt ?? .distantPast
-                let bDate = b.createdAt ?? .distantPast
-                return aDate > bDate
-            }
-
-            print("✅ fallback snapshot count=\(items.count)")
             self.sponsored = items
         }
     }
 
+    // MARK: - Apply snapshot
     private func applySnapshot(_ snap: QuerySnapshot?) {
         guard let snap = snap else {
             print("⚠️ sponsored listener: nil snapshot")

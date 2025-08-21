@@ -20,6 +20,7 @@
 		ABBDF90D2E551DFA00D5B5B0 /* SilverCheckeredFoil.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF90C2E551DFA00D5B5B0 /* SilverCheckeredFoil.swift */; };
 		ABBDF90F2E55A2AC00D5B5B0 /* ChallengeLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF90E2E55A2AC00D5B5B0 /* ChallengeLink.swift */; };
 		ABBDF9112E56277C00D5B5B0 /* ChallengeLinkDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF9102E56277C00D5B5B0 /* ChallengeLinkDetails.swift */; };
+		ABBDF9132E57753800D5B5B0 /* ViewLeaderboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBDF9122E57753800D5B5B0 /* ViewLeaderboard.swift */; };
 		ABD38B8B2E412C7B00CC17BD /* YTDSummaryChallenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B8A2E412C7B00CC17BD /* YTDSummaryChallenge.swift */; };
 		ABD38B8F2E41DB4300CC17BD /* ChaiLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B8E2E41DB4300CC17BD /* ChaiLauncher.swift */; };
 		ABD38B912E41DF3E00CC17BD /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD38B902E41DF3E00CC17BD /* ChatMessage.swift */; };
@@ -83,6 +84,7 @@
 		ABBDF90C2E551DFA00D5B5B0 /* SilverCheckeredFoil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilverCheckeredFoil.swift; sourceTree = "<group>"; };
 		ABBDF90E2E55A2AC00D5B5B0 /* ChallengeLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeLink.swift; sourceTree = "<group>"; };
 		ABBDF9102E56277C00D5B5B0 /* ChallengeLinkDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeLinkDetails.swift; sourceTree = "<group>"; };
+		ABBDF9122E57753800D5B5B0 /* ViewLeaderboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewLeaderboard.swift; sourceTree = "<group>"; };
 		ABD38B8A2E412C7B00CC17BD /* YTDSummaryChallenge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YTDSummaryChallenge.swift; sourceTree = "<group>"; };
 		ABD38B8E2E41DB4300CC17BD /* ChaiLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChaiLauncher.swift; sourceTree = "<group>"; };
 		ABD38B902E41DF3E00CC17BD /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
@@ -208,6 +210,7 @@
 				ABD38B942E449B9900CC17BD /* GameTitlesView.swift */,
 				ABD38B962E449BA300CC17BD /* TrainingTitlesView.swift */,
 				ABF283502E3ABA280057C6E6 /* HeroHeader.swift */,
+				ABBDF9122E57753800D5B5B0 /* ViewLeaderboard.swift */,
 				ABBDF90A2E54E4AD00D5B5B0 /* YourRank.swift */,
 				ABF5CB402E3729AB000D4E79 /* LeaderboardView.swift */,
 				ABF5CB242E3404BE000D4E79 /* LeaderboardStrip.swift */,
@@ -425,6 +428,7 @@
 				ABF5CB312E3404F6000D4E79 /* MyChallengesView.swift in Sources */,
 				ABD38B932E449B8B00CC17BD /* ChallengeTitleStore.swift in Sources */,
 				ABF5CB332E340502000D4E79 /* WalletView.swift in Sources */,
+				ABBDF9132E57753800D5B5B0 /* ViewLeaderboard.swift in Sources */,
 				ABD38B912E41DF3E00CC17BD /* ChatMessage.swift in Sources */,
 				ABF5CB292E3404CF000D4E79 /* ChallengeCardView.swift in Sources */,
 				ABBDF9032E52528F00D5B5B0 /* SponsoredTab.swift in Sources */,
