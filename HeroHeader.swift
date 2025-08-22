@@ -18,6 +18,19 @@ struct HeroHeader: View {
             // 👇 Limit the container to exactly the card height (plus tiny breathing room)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: spacing) {
+                    // If no events were passed in, show the NoEvents card first
+                    if todays.isEmpty {
+                        NavigationLink {
+                            EventsView()
+                        } label: {
+                            NoEvents()
+                                .frame(width: cardW, height: cardH)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                                .shadow(color: .black.opacity(0.12), radius: 5, x: 0, y: 3)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     ForEach(todays) { event in
                         heroCard(for: event, cardHeight: cardH)
                             .frame(width: cardW, height: cardH)
@@ -25,9 +38,9 @@ struct HeroHeader: View {
                             .shadow(color: .black.opacity(0.12), radius: 5, x: 0, y: 3)
                     }
 
-                    // 👇 Always append the leaderboard card here
+                    // Always append leaderboard promo
                     NavigationLink {
-                        LeaderboardView()   // <-- your existing leaderboard screen
+                        LeaderboardView()
                     } label: {
                         ViewLeaderboard()
                             .frame(width: cardW, height: cardH)
@@ -36,6 +49,7 @@ struct HeroHeader: View {
                     }
                     .buttonStyle(.plain)
                 }
+
                 .padding(.horizontal, 16)
                 .padding(.vertical, 6) // keep this small to avoid extra gap
             }

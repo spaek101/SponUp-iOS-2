@@ -39,7 +39,7 @@ struct MainTabView: View {
                 }
                 .tabItem {
                     Image(systemName: "checkmark.square")
-                    Text("My Challenges")
+                    Text("My Training")
                 }
                 .tag(1)
 

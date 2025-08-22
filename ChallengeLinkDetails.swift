@@ -6,19 +6,25 @@ struct ChallengeLinkDetails: View {
     // Selected challenges (binding from parent)
     @Binding var selectedChallenges: [Challenge]
 
-    // Only pass future events with capacity from the parent
+    // Only pass future events (parent filters if desired)
     var upcomingEvents: [Event]
+
+    // Live lookup from parent so counts stay fresh between links
+    var existingLinkedCount: (String) -> Int
 
     // Callbacks
     var onLinkSelection: (([(challengeId: String, eventId: String)]) -> Void)? = nil
     var onConfirmLink: (() -> Void)? = nil
     var onClear: (() -> Void)? = nil
 
-    // Notify parent to truly unaccept (removes from acceptedChallenges so card reverts to "Accept")
-    var onUnaccept: ((String, String?) -> Void)? = nil   // (challengeID, eventID)
+    // Notify parent to truly unaccept (so card reverts to "Accept")
+    var onUnaccept: ((String, String?) -> Void)? = nil   // (challengeID, previousEventID)
 
     // Track which event each challenge is linked to (locally in this sheet)
     @State private var selectedEventIdByChallenge: [String: String] = [:]
+
+    // CONFIG
+    private let maxLinksPerEvent = 3
 
     // MARK: - Totals
     private var totalCash: Int {
@@ -26,6 +32,50 @@ struct ChallengeLinkDetails: View {
     }
     private var totalPoints: Int {
         selectedChallenges.reduce(0) { $0 + ($1.rewardPoints ?? 0) }
+    }
+
+    // Count how many would be linked to an event *if confirmed now*
+    // = base existing + rows moved into this event − rows moved out of this event.
+    private func currentLinkCount(for eventID: String) -> Int {
+        let base = existingLinkedCount(eventID)
+        var delta = 0
+
+        for ch in selectedChallenges {
+            guard let cid = ch.id else { continue }
+            let originalOpt: String? = ch.eventID
+            let chosenOpt: String?   = selectedEventIdByChallenge[cid] ?? originalOpt
+
+            let wasIn = (originalOpt == eventID)
+            let nowIn = (chosenOpt   == eventID)
+
+            if !wasIn && nowIn { delta += 1 }   // moved into this event
+            if  wasIn && !nowIn { delta -= 1 }  // moved out of this event
+        }
+        return max(0, base + delta)
+    }
+
+    // Remaining slots for an event (0...max)
+    private func remainingSlots(for eventID: String?) -> Int {
+        guard let eventID = eventID else { return 0 }
+        return max(0, maxLinksPerEvent - currentLinkCount(for: eventID))
+    }
+
+    // Make a binding to the selected event id for a specific challenge
+    private func bindingForEventId(_ challengeId: String?) -> Binding<String?> {
+        Binding<String?>(
+            get: {
+                guard let id = challengeId else { return nil }
+                return selectedEventIdByChallenge[id]
+            },
+            set: { newValue in
+                guard let id = challengeId else { return }
+                if let v = newValue, !v.isEmpty {
+                    selectedEventIdByChallenge[id] = v
+                } else {
+                    selectedEventIdByChallenge.removeValue(forKey: id)
+                }
+            }
+        )
     }
 
     var body: some View {
@@ -52,17 +102,21 @@ struct ChallengeLinkDetails: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List {
-                        ForEach(selectedChallenges, id: \.id) { ch in
+                        // Using enumerated keeps your removal-by-index logic intact
+                        ForEach(Array(selectedChallenges.enumerated()), id: \.offset) { idx, ch in
                             ChallengeRow(
                                 ch: ch,
                                 selectedEventId: bindingForEventId(ch.id),
                                 upcomingEvents: upcomingEvents,
+                                // Capacity helpers
+                                remainingSlots: { eid in remainingSlots(for: eid) },                    // (String?) -> Int
+                                usedCount: { eid in maxLinksPerEvent - remainingSlots(for: eid) },       // (String?) -> Int
+                                maxLinksPerEvent: maxLinksPerEvent,
                                 onRemove: {
                                     withAnimation {
-                                        selectedChallenges.removeAll { $0.id == ch.id }
-                                        if let id = ch.id { selectedEventIdByChallenge[id] = nil }
+                                        selectedChallenges.remove(at: idx)
+                                        if let id = ch.id { selectedEventIdByChallenge.removeValue(forKey: id) }
                                     }
-                                    // tell parent to unaccept so card flips back to "Accept"
                                     if let id = ch.id {
                                         onUnaccept?(id, ch.eventID)
                                     }
@@ -131,8 +185,7 @@ struct ChallengeLinkDetails: View {
                                 guard let id = ch.id else { return false }
                                 return linkedIDs.contains(id)
                             }
-                            // clear local selections for those we removed
-                            linkedIDs.forEach { selectedEventIdByChallenge[$0] = nil }
+                            linkedIDs.forEach { selectedEventIdByChallenge.removeValue(forKey: $0) }
                         }
 
                         // 3) Optional existing hook (e.g., close the sheet/banners)
@@ -158,12 +211,8 @@ struct ChallengeLinkDetails: View {
             .navigationTitle("ChallengeLink")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title2.bold())
-                            .foregroundColor(.secondary)
-                    }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { dismiss() }
                 }
             }
             .background(Color(.systemBackground))
@@ -177,17 +226,6 @@ struct ChallengeLinkDetails: View {
             }
         }
     }
-
-    // Make a binding to the selected event id for a specific challenge
-    private func bindingForEventId(_ challengeId: String?) -> Binding<String?> {
-        Binding<String?>(
-            get: { challengeId.flatMap { selectedEventIdByChallenge[$0] } },
-            set: { newValue in
-                guard let id = challengeId else { return }
-                selectedEventIdByChallenge[id] = newValue
-            }
-        )
-    }
 }
 
 // MARK: - Row
@@ -195,9 +233,17 @@ private struct ChallengeRow: View {
     let ch: Challenge
     @Binding var selectedEventId: String?
     var upcomingEvents: [Event]
+
+    var remainingSlots: (String?) -> Int
+    var usedCount: (String?) -> Int
+    var maxLinksPerEvent: Int
+
     var onRemove: () -> Void
 
     @State private var showEventPicker = false
+    @State private var showNoEventsAlert = false
+
+    // Helpers that were missing or moved out of scope:
 
     private var rewardText: String {
         let cash = ch.rewardCash ?? 0
@@ -212,6 +258,28 @@ private struct ChallengeRow: View {
         return upcomingEvents.first(where: { $0.id == id })?.title
     }
 
+    private var buttonLabel: String {
+        if let title = eventTitle(for: selectedEventId) {
+            if let eid = selectedEventId {
+                let used = usedCount(eid)
+                return "Linked to \(title) (\(used)/\(maxLinksPerEvent))"
+            }
+            return "Linked to \(title)"
+        } else if upcomingEvents.isEmpty {
+            return "No upcoming events to link"
+        } else {
+            let allFull = upcomingEvents.allSatisfy { ev in remainingSlots(ev.id) == 0 }
+            if allFull { return "No events to link" }
+            return "Link to an event"
+        }
+    }
+
+    private func eventPickerLabel(for title: String, slots: Int) -> String {
+        if slots == 0 { return "\(title) — Full" }
+        if slots == 1 { return "\(title) — 1 left" }
+        return "\(title) — \(slots) left"
+    }
+
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             ChallengeAvatar(ch: ch)
@@ -221,8 +289,14 @@ private struct ChallengeRow: View {
                     .font(.headline)
                     .lineLimit(1)
 
+                // Guarded button: no empty picker, show alert when none/ full
                 Button {
-                    showEventPicker = true
+                    let allFull = upcomingEvents.allSatisfy { ev in remainingSlots(ev.id) == 0 }
+                    if upcomingEvents.isEmpty || allFull {
+                        showNoEventsAlert = true
+                    } else {
+                        showEventPicker = true
+                    }
                 } label: {
                     Text(buttonLabel)
                         .font(.caption.bold())
@@ -237,16 +311,20 @@ private struct ChallengeRow: View {
                 }
                 .buttonStyle(.plain)
                 .confirmationDialog("Select Event", isPresented: $showEventPicker, titleVisibility: .visible) {
-                    if upcomingEvents.isEmpty {
-                        Button("No upcoming events to link") { }
-                    } else {
-                        ForEach(upcomingEvents, id: \.id) { event in
-                            Button(event.title) {
-                                selectedEventId = event.id
-                            }
+                    ForEach(upcomingEvents, id: \.id) { event in
+                        let slots = remainingSlots(event.id)
+                        let isThisRowsCurrent = (selectedEventId == event.id)
+                        let disabled = (slots == 0 && !isThisRowsCurrent)
+
+                        Button(eventPickerLabel(for: event.title, slots: slots)) {
+                            if !disabled { selectedEventId = event.id }
                         }
-                        Button("Cancel", role: .cancel) { }
+                        .disabled(disabled)
                     }
+                    Button("Cancel", role: .cancel) { }
+                }
+                .alert("You must first create an event", isPresented: $showNoEventsAlert) {
+                    Button("OK", role: .cancel) { }
                 }
 
                 Text(rewardText)
@@ -265,16 +343,6 @@ private struct ChallengeRow: View {
             .buttonStyle(.plain)
         }
         .contentShape(Rectangle())
-    }
-
-    private var buttonLabel: String {
-        if let title = eventTitle(for: selectedEventId) {
-            return "Linked to \(title)"
-        } else if upcomingEvents.isEmpty {
-            return "No upcoming events to link"
-        } else {
-            return "Link to an event"
-        }
     }
 }
 
@@ -313,7 +381,6 @@ private struct ChallengeAvatar: View {
         .shadow(radius: 1)
     }
 }
-
 
 // MARK: - Summary
 private struct SummaryCard: View {

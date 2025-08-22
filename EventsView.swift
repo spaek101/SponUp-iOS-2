@@ -15,6 +15,14 @@ struct EventsView: View {
     @State private var userEvents: [Event] = []
     @State private var acceptedChallenges: [Challenge] = []
 
+    // Bottom “link” flow
+    @State private var pendingAccepted: [Challenge] = []      // drives bottom banner in other screens
+    @State private var showChallengeLink = false
+
+    // 👇 Missing before
+    @State private var showLinkSheet = false
+    @State private var selectedChallenges: [Challenge] = []
+
     // Force calendar refresh when events load
     @State private var calendarRefreshID = UUID()
 
@@ -29,24 +37,40 @@ struct EventsView: View {
 
     // MARK: – Derived helpers
 
+    /// Union of challenges assigned to an event either via `challenge.eventID`
+    /// or via the event’s `challengeIDs` array. Keeps previously linked items visible.
     private func challengesForEvent(_ evt: Event) -> [Challenge] {
-        // Prefer matching by eventID on the challenge doc
         let eid = evt.id
-        let byEventID = self.acceptedChallenges.filter { $0.eventID == eid }
-        if !byEventID.isEmpty { return byEventID }
+        let byEventID = acceptedChallenges.filter { $0.eventID == eid }
 
-        // Fallback: match by event.challengeIDs array
         let idSet = Set(evt.challengeIDs)
-        return self.acceptedChallenges.filter { ch in
+        let byArray = acceptedChallenges.filter { ch in
             guard let cid = ch.id else { return false }
             return idSet.contains(cid)
         }
+
+        var map: [String: Challenge] = [:]
+        for ch in byEventID { if let id = ch.id { map[id] = ch } }
+        for ch in byArray   { if let id = ch.id { map[id] = ch } }
+        return map.values.sorted { $0.title < $1.title }
     }
 
-    private var challengesByEventID: [String: [Challenge]] {
-        let linked = acceptedChallenges.filter { $0.eventID != nil }
-        return Dictionary(grouping: linked, by: { $0.eventID! })
+    /// How many challenges are already linked per event (from backend/local state).
+    private var existingLinkedCounts: [String: Int] {
+        Dictionary(grouping: acceptedChallenges.compactMap { $0.eventID }) { $0 }
+            .mapValues { $0.count }
     }
+    
+    // MARK: – Pending strip recompute
+    private func recomputePendingAccepted() {
+        // Pending = accepted challenges that are not linked to any event.
+        // Keep it simple (avoid heavy enum/string checks): just look at eventID.
+        pendingAccepted = acceptedChallenges.filter { ch in
+            let linked = ch.eventID ?? ""
+            return linked.isEmpty
+        }
+    }
+
 
     private var eventsByDate: [Date: [Event]] {
         Dictionary(grouping: userEvents, by: { calendar.startOfDay(for: $0.startAt) })
@@ -147,21 +171,79 @@ struct EventsView: View {
                     }
                 }
             }
-            .onAppear {
-                // Load events + accepted, then sweep for unsubmitted after 5 days
-                let group = DispatchGroup()
+            // 👇 Link sheet — keep strip closed after linking, and never reopen on dismiss
+            .sheet(isPresented: $showLinkSheet, onDismiss: {
+                // Just clear the sheet list and keep the strip OFF.
+                selectedChallenges.removeAll()
+                showChallengeLink = false
+            }) {
+                let futureEvents = userEvents.filter { $0.startAt > Date() }
 
+                ChallengeLinkDetails(
+                    selectedChallenges: $selectedChallenges,
+                    upcomingEvents: futureEvents,
+                    existingLinkedCount: { eid in
+                        // live count so capacity/labels update on repeat links
+                        acceptedChallenges.filter { $0.eventID == eid }.count
+                    },
+
+
+                    // ✅ When user hits the big "Link" in the details screen:
+                    onLinkSelection: { pairs in
+                        // Build a lookup of the selected models (so we can merge them locally after linking)
+                        let byId: [String: Challenge] = Dictionary(
+                            uniqueKeysWithValues: selectedChallenges.compactMap { ch in
+                                guard let id = ch.id else { return nil }
+                                return (id, ch)
+                            }
+                        )
+
+                        linkPairsToFirestore(pairs, sourceModels: byId) {
+                            recomputePendingAccepted()      // keeps the strip in sync
+                            selectedChallenges.removeAll()
+                            showChallengeLink = false
+                            showLinkSheet = false
+                        }
+                    },
+
+
+                    // (safety) if the child calls this without pairs, still close everything
+                    onConfirmLink: {
+                        pendingAccepted.removeAll()
+                        selectedChallenges.removeAll()
+                        showChallengeLink = false
+                        showLinkSheet = false
+                    },
+
+                    // "Clear Picks" in the details view only clears that temporary list
+                    onClear: {
+                        selectedChallenges.removeAll()
+                    },
+
+                    // IMPORTANT: do NOT mutate Events here. Only flip local accepted state
+                    // when user explicitly unaccepts from the details view.
+                    onUnaccept: { challengeId, previousEventId in
+                        // Only revert the *accepted* copy; do NOT remove anything from Events unless you intend to.
+                        if let idx = acceptedChallenges.firstIndex(where: { $0.id == challengeId }) {
+                            acceptedChallenges[idx].eventID = nil
+                        }
+                        // If you truly want to detach from the event when unaccepting, you can,
+                        // but per your request, we leave Events alone here.
+                    }
+                )
+            }
+
+            .onAppear {
+                let group = DispatchGroup()
                 group.enter()
                 loadUserEvents { group.leave() }
-
                 group.enter()
                 loadAcceptedChallenges { group.leave() }
-
                 group.notify(queue: .main) {
                     sweepExpiredUnsubmitted() // 🔁 rule (3)
+                    recomputePendingAccepted()
                 }
             }
-            // Tick 'now' every 15s so cards flip state automatically when event time passes
             .onReceive(Timer.publish(every: 15, on: .main, in: .common).autoconnect()) { tick in
                 now = tick
             }
@@ -250,11 +332,9 @@ struct EventsView: View {
                                         .foregroundColor(.white)
                                         .cornerRadius(8)
                                 }
-                                .onChange(of: pickedItems) { _ in
+                                .onChange(of: pickedItems) { _, _ in
                                     uploadForEvent = evt
-                                    // TODO: Upload to Storage and write a submission doc under:
-                                    // users/{uid}/submissions/{challengeId or eventId_challengeId}
-                                    // with fields: { status: "pending", eventID, challengeID, uploadedAt }
+                                    // TODO: Upload & write submission doc
                                 }
                                 .padding(.top, 8)
                             }
@@ -347,10 +427,67 @@ struct EventsView: View {
         }
     }
 
-    private func removeChallenge(_ challenge: Challenge, from event: Event) {
-        // Hard lock once event has started
-        if Date() >= event.startAt { return }
+    private func linkPairsToFirestore(
+        _ pairs: [(challengeId: String, eventId: String)],
+        sourceModels: [String: Challenge] = [:],
+        completion: (() -> Void)? = nil
+    ) {
+        guard !pairs.isEmpty else { completion?(); return }
+        guard let uid = userID else { return }
 
+        let batch = db.batch()
+
+        // 1) Persist links
+        for (cid, eid) in pairs {
+            let accRef = db.collection("users").document(uid)
+                .collection("acceptedChallenges").document(cid)
+            batch.setData(["eventID": eid], forDocument: accRef, merge: true)
+
+            let evtRef = db.collection("events").document(eid)
+            batch.updateData(["challengeIDs": FieldValue.arrayUnion([cid])], forDocument: evtRef)
+        }
+
+        batch.commit { err in
+            if let err = err {
+                print("Batch link failed: \(err)")
+                return
+            }
+
+            // 2) Local UI merge so the EventsView cards show the new links immediately
+            DispatchQueue.main.async {
+                // Fast index for existing accepted challenges
+                var indexById: [String: Int] = [:]
+                for (i, ch) in acceptedChallenges.enumerated() {
+                    if let id = ch.id { indexById[id] = i }
+                }
+
+                for (cid, eid) in pairs {
+                    if let idx = indexById[cid] {
+                        // Update an existing accepted item
+                        acceptedChallenges[idx].eventID = eid
+                    } else if var src = sourceModels[cid] {
+                        // Merge a new accepted item from the sheet models
+                        src.eventID = eid
+                        acceptedChallenges.append(src)
+                        indexById[cid] = acceptedChallenges.count - 1
+                    }
+
+                    // Ensure the local event has the challenge id
+                    if let eidx = userEvents.firstIndex(where: { $0.id == eid }) {
+                        if !userEvents[eidx].challengeIDs.contains(cid) {
+                            userEvents[eidx].challengeIDs.append(cid)
+                        }
+                    }
+                }
+
+                completion?()
+            }
+        }
+    }
+
+
+    private func removeChallenge(_ challenge: Challenge, from event: Event) {
+        if Date() >= event.startAt { return }
         guard let cid = challenge.id else { return }
         let eid = event.id ?? challenge.eventID
 
@@ -370,7 +507,7 @@ struct EventsView: View {
                   if let err = err { print("Remove (user) failed: \(err)") }
               }
 
-            // 🔁 Make it AVAILABLE again in the sponsored feed
+            // Flip back to available in feed
             db.collection("users").document(uid)
               .collection("challenges")
               .document(cid)
@@ -380,7 +517,7 @@ struct EventsView: View {
               ], merge: true)
         }
 
-        // Detach from event’s challengeIDs array
+        // Detach from event doc
         if let eid = eid {
             db.collection("events").document(eid)
               .updateData(["challengeIDs": FieldValue.arrayRemove([cid])]) { err in
@@ -413,6 +550,8 @@ struct EventsView: View {
               let challenges = snap?.documents.compactMap { parseChallengeData($0.data()) } ?? []
               DispatchQueue.main.async {
                   acceptedChallenges = challenges
+                  recomputePendingAccepted()
+
               }
           }
     }
@@ -421,11 +560,8 @@ struct EventsView: View {
 
     private func sweepExpiredUnsubmitted() {
         guard let uid = userID else { return }
-
-        // Anything with event.endDate earlier than 5 days ago
         let cutoff = Calendar.current.date(byAdding: .day, value: -5, to: Date()) ?? Date()
 
-        // Build quick lookup for events
         let eventsById: [String: Event] = Dictionary(uniqueKeysWithValues:
             userEvents.compactMap { e in
                 guard let id = e.id else { return nil }
@@ -433,7 +569,6 @@ struct EventsView: View {
             }
         )
 
-        // Linked challenges only
         let linked = acceptedChallenges.filter { $0.eventID != nil }
 
         for ch in linked {
@@ -444,19 +579,16 @@ struct EventsView: View {
                 evt.endDate < cutoff
             else { continue }
 
-            // Check submission status (adjust collection/key if needed)
             let subRef = db.collection("users").document(uid)
                 .collection("submissions")
-                .document(cid)   // or "\(eid)_\(cid)" if that’s your key
+                .document(cid)
 
             subRef.getDocument { snap, _ in
                 let status = (snap?.data()?["status"] as? String) ?? "missing"
                 let accepted = status == "accepted"
                 let pending  = status == "pending"
 
-                // Only recycle if nothing accepted/pending
                 if !accepted && !pending {
-                    // 1) Flip feed item back to available so it shows in Sponsored
                     db.collection("users").document(uid)
                       .collection("challenges")
                       .document(cid)
@@ -465,19 +597,16 @@ struct EventsView: View {
                           "eventID": FieldValue.delete()
                       ], merge: true)
 
-                    // 2) Remove from user's accepted list
                     db.collection("users").document(uid)
                       .collection("acceptedChallenges")
                       .document(cid)
                       .delete()
 
-                    // 3) Detach from event doc
                     db.collection("events").document(eid)
                       .updateData(["challengeIDs": FieldValue.arrayRemove([cid])]) { err in
                           if let err = err { print("Detach from event failed: \(err)") }
                       }
 
-                    // 4) Update local state optimistically
                     DispatchQueue.main.async {
                         acceptedChallenges.removeAll { $0.id == cid }
                         if let eidx = userEvents.firstIndex(where: { $0.id == eid }) {
@@ -631,6 +760,8 @@ struct CalendarDayView: View {
     }
 }
 
+
+
 // MARK: – AddEventView
 
 struct AddEventView: View {
@@ -677,3 +808,5 @@ struct AddEventView: View {
         .ignoresSafeArea(.keyboard)
     }
 }
+
+
