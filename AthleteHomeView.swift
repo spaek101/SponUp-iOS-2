@@ -118,18 +118,36 @@ struct AthleteHomeView: View {
                         Color.clear.frame(height: 12)
 
                         // Tabs row
-                        VStack(spacing: 12) {
-                            HStack(spacing: 12) {
-                                Button("Challenge") { selectedFilter = .eventFocus }
-                                    .tabStyle(selectedFilter == .eventFocus)
-                                Button("Training") { selectedFilter = .training }
-                                    .tabStyle(selectedFilter == .training)
-                                Button("Sponsored") { selectedFilter = .sponsored }
-                                    .tabStyle(selectedFilter == .sponsored)
+                        VStack(spacing: AppSpacing.md) {
+                            HStack(spacing: AppSpacing.md) {
+                                Button("Challenge") { 
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                        selectedFilter = .eventFocus
+                                    }
+                                    HapticManager.impact(style: .light)
+                                }
+                                .modernTab(isSelected: selectedFilter == .eventFocus)
+                                
+                                Button("Training") { 
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                        selectedFilter = .training
+                                    }
+                                    HapticManager.impact(style: .light)
+                                }
+                                .modernTab(isSelected: selectedFilter == .training)
+                                
+                                Button("Sponsored") { 
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                        selectedFilter = .sponsored
+                                    }
+                                    HapticManager.impact(style: .light)
+                                }
+                                .modernTab(isSelected: selectedFilter == .sponsored)
+                                
                                 Spacer()
                             }
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, AppSpacing.md)
 
                         // Suggested Challenges content
                         if selectedFilter == .eventFocus {
@@ -204,10 +222,7 @@ struct AthleteHomeView: View {
                 }
             }
             .background(
-                Image("leaderboard_bg")
-                    .resizable()
-                    .scaledToFill()
-                    .opacity(0.15)
+                AnimatedBackground()
                     .ignoresSafeArea()
             )
             .tint(.white)
@@ -719,15 +734,11 @@ private struct ZstackNoScheduled: View {
 }
 
 // Match SponsorHomeView’s tab pill style
+// Modern tab style using design system
 private extension View {
     func tabStyle(_ selected: Bool) -> some View {
         self
-            .font(.caption.bold())
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(selected ? Color.brown : Color(red: 0.93, green: 0.87, blue: 0.74))
-            .foregroundColor(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .modernTab(isSelected: selected)
     }
 }
 

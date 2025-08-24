@@ -93,5 +93,29 @@ struct MainTabView: View {
                 .tag(3)
             }
         }
+        .accentColor(AppColors.accent)
+        .onAppear {
+            // Configure tab bar appearance for modern look
+            let appearance = UITabBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = UIColor(AppColors.surface)
+            
+            // Selected tab styling
+            appearance.stackedLayoutAppearance.selected.iconColor = UIColor(AppColors.accent)
+            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
+                .foregroundColor: UIColor(AppColors.accent),
+                .font: UIFont.systemFont(ofSize: 12, weight: .semibold)
+            ]
+            
+            // Normal tab styling
+            appearance.stackedLayoutAppearance.normal.iconColor = UIColor(AppColors.textSecondary)
+            appearance.stackedLayoutAppearance.normal.titleTextAttributes = [
+                .foregroundColor: UIColor(AppColors.textSecondary),
+                .font: UIFont.systemFont(ofSize: 12, weight: .medium)
+            ]
+            
+            UITabBar.appearance().standardAppearance = appearance
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+        }
     }
 }

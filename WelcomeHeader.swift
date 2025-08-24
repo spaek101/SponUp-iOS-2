@@ -9,6 +9,9 @@ struct WelcomeHeader: View {
     let userFirstName: String
     let userLastName: String
     let kind: Kind
+    
+    @State private var isAnimating = false
+    @State private var showConfetti = false
 
     // MARK: - Initializers
 
@@ -33,18 +36,35 @@ struct WelcomeHeader: View {
             return false
         }()
 
-        HStack(spacing: 12) {
-            // Left: profile + first name
+        HStack(spacing: AppSpacing.md) {
+            // Left: profile + first name with playful animation
             NavigationLink(destination: ProfileView()) {
-                HStack(spacing: 10) {
-                    Image(systemName: "person.crop.circle")
-                        .font(.system(size: 32))
-                        .foregroundColor(.gray.opacity(0.6))
-                    Text(userFirstName)
-                        .foregroundColor(.black)
-                        .font(.callout)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.85)
+                HStack(spacing: AppSpacing.sm) {
+                    // Animated profile icon
+                    ZStack {
+                        Circle()
+                            .fill(AppGradients.accent)
+                            .frame(width: 40, height: 40)
+                            .scaleEffect(isAnimating ? 1.1 : 1.0)
+                            .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isAnimating)
+                        
+                        Image(systemName: "person.crop.circle.fill")
+                            .font(.system(size: 36))
+                            .foregroundColor(.white)
+                            .shadow(color: AppColors.accent.opacity(0.3), radius: 4, x: 0, y: 2)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Hey,")
+                            .font(AppTypography.caption)
+                            .foregroundColor(AppColors.textSecondary)
+                        
+                        Text(userFirstName)
+                            .font(AppTypography.title3.weight(.bold))
+                            .foregroundColor(AppColors.textPrimary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
+                    }
                 }
             }
             .buttonStyle(.plain)
@@ -53,61 +73,161 @@ struct WelcomeHeader: View {
             switch kind {
             case let .athlete(points, cash):
                 Spacer() // push chips to the right edge
-                HStack(spacing: 8) {
-                    StatChip(icon: "star.fill",              text: "\(points) pts", width: 78)
-                    StatChip(icon: "dollarsign.circle.fill", text: "\(cash)",      width: 78)
+                
+                VStack(spacing: AppSpacing.sm) {
+                    // Points chip with star animation
+                    HStack(spacing: AppSpacing.xs) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.yellow)
+                            .rotationEffect(.degrees(isAnimating ? 360 : 0))
+                            .animation(.linear(duration: 3.0).repeatForever(autoreverses: false), value: isAnimating)
+                        
+                        Text("\(points)")
+                            .font(AppTypography.headline.weight(.bold))
+                            .foregroundColor(.white)
+                        
+                        Text("pts")
+                            .font(AppTypography.caption.weight(.medium))
+                            .foregroundColor(.white.opacity(0.9))
+                    }
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.vertical, AppSpacing.sm)
+                    .background(
+                        RoundedRectangle(cornerRadius: AppCornerRadius.medium)
+                            .fill(AppGradients.primary)
+                            .shadow(color: AppColors.primary.opacity(0.3), radius: 6, x: 0, y: 3)
+                    )
+                    
+                    // Cash chip with dollar animation
+                    HStack(spacing: AppSpacing.xs) {
+                        Image(systemName: "dollarsign.circle.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.green)
+                            .scaleEffect(isAnimating ? 1.2 : 1.0)
+                            .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: isAnimating)
+                        
+                        Text("$\(cash)")
+                            .font(AppTypography.headline.weight(.bold))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.vertical, AppSpacing.sm)
+                    .background(
+                        RoundedRectangle(cornerRadius: AppCornerRadius.medium)
+                            .fill(AppGradients.accent)
+                            .shadow(color: AppColors.accent.opacity(0.3), radius: 6, x: 0, y: 3)
+                    )
                 }
 
             case let .sponsor(balance, _, onTopUp):
                 Spacer() // push wallet card to the right edge
 
-                // Wallet amount + "+" button inside the header
-                HStack(spacing: 12) {
-                    Text(String(format: "$%.2f", balance))
-                        .font(isCompactSponsor ? .title3.bold() : .title2.bold())
-                        .monospacedDigit()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-
-                    Button("+") {
-                        onTopUp?()
+                // Modern wallet card with playful elements
+                VStack(spacing: AppSpacing.sm) {
+                    HStack(spacing: AppSpacing.md) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Balance")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                            
+                            Text(String(format: "$%.2f", balance))
+                                .font(isCompactSponsor ? AppTypography.title3.weight(.bold) : AppTypography.title2.weight(.bold))
+                                .monospacedDigit()
+                                .foregroundColor(AppColors.textPrimary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                        
+                        Button(action: {
+                            HapticManager.impact(style: .medium)
+                            onTopUp?()
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 28))
+                                .foregroundColor(AppColors.accent)
+                                .background(Circle().fill(.white))
+                                .scaleEffect(isAnimating ? 1.1 : 1.0)
+                                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .font(.subheadline.bold())
-                    .frame(width: 32, height: 32)        // square frame for circle
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .clipShape(Circle())
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(Color(.systemGray6))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .frame(minWidth: 200, alignment: .trailing) // enough room; stays on the right
-                // no maxWidth .infinity and no high layoutPriority -> prevents name from disappearing
+                .padding(AppSpacing.md)
+                .background(
+                    RoundedRectangle(cornerRadius: AppCornerRadius.large)
+                        .fill(AppColors.surface)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: AppCornerRadius.large)
+                                .stroke(AppColors.accent.opacity(0.2), lineWidth: 1)
+                        )
+                        .shadow(color: AppShadows.medium.color, radius: AppShadows.medium.radius, x: AppShadows.medium.x, y: AppShadows.medium.y)
+                )
+                .frame(minWidth: 200, alignment: .trailing)
             }
         }
         // Compact sponsor trims padding so it fits cleanly in a tight row
-        .padding(.horizontal, isCompactSponsor ? 0 : 16)
-        .padding(.top, isCompactSponsor ? 0 : 20)
+        .padding(.horizontal, isCompactSponsor ? 0 : AppSpacing.md)
+        .padding(.top, isCompactSponsor ? 0 : AppSpacing.lg)
+        .onAppear {
+            isAnimating = true
+        }
     }
 }
 
-// Same pill style
-private struct StatChip: View {
-    let icon: String
-    let text: String
-    var width: CGFloat = 80
-
+// MARK: - Confetti Animation View
+struct ConfettiView: View {
+    @State private var particles: [ConfettiParticle] = []
+    
     var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 14, weight: .semibold))
-            Text(text)
-                .font(.caption.bold())
+        ZStack {
+            ForEach(particles) { particle in
+                Circle()
+                    .fill(particle.color)
+                    .frame(width: particle.size, height: particle.size)
+                    .position(particle.position)
+                    .opacity(particle.opacity)
+                    .animation(.easeOut(duration: particle.duration), value: particle.position)
+            }
         }
-        .foregroundColor(.white)
-        .frame(width: width, height: 32)
-        .background(Color.blue)
-        .clipShape(Capsule())
+        .onAppear {
+            generateParticles()
+        }
     }
+    
+    private func generateParticles() {
+        let colors: [Color] = [.red, .blue, .green, .yellow, .orange, .purple, .pink]
+        
+        for _ in 0..<30 {
+            let particle = ConfettiParticle(
+                color: colors.randomElement() ?? .blue,
+                size: CGFloat.random(in: 4...8),
+                position: CGPoint(
+                    x: CGFloat.random(in: 0...UIScreen.main.bounds.width),
+                    y: CGFloat.random(in: 0...UIScreen.main.bounds.height)
+                ),
+                opacity: Double.random(in: 0.6...1.0),
+                duration: Double.random(in: 2.0...4.0)
+            )
+            particles.append(particle)
+        }
+    }
+}
+
+struct ConfettiParticle: Identifiable {
+    let id = UUID()
+    let color: Color
+    let size: CGFloat
+    var position: CGPoint
+    let opacity: Double
+    let duration: Double
+}
+
+#Preview {
+    VStack(spacing: 20) {
+        WelcomeHeader(userFirstName: "Alex", userLastName: "Johnson", points: 1250, cash: 45)
+        WelcomeHeader(userFirstName: "Coach", userLastName: "Smith", balance: 299.99, compact: false)
+    }
+    .padding()
+    .background(Color(.systemBackground))
 }

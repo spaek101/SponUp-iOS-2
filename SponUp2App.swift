@@ -48,18 +48,24 @@ private extension SponUp2App {
     func configureTabBarAppearance() {
         let tab = UITabBarAppearance()
         tab.configureWithOpaqueBackground()
-        tab.backgroundColor = UIColor(named: "charcoalBlack") ?? .black
+        tab.backgroundColor = UIColor(AppColors.surface)
 
-        let accent    = UIColor(named: "accentPrimary") ?? .systemBlue
-        let lightGray = UIColor(named: "surfaceSecondary") ?? UIColor(white: 0.82, alpha: 1)
+        let accent = UIColor(AppColors.accent)
+        let secondary = UIColor(AppColors.textSecondary)
 
         let sel = tab.stackedLayoutAppearance.selected
         sel.iconColor = accent
-        sel.titleTextAttributes = [.foregroundColor: accent]
+        sel.titleTextAttributes = [
+            .foregroundColor: accent,
+            .font: UIFont.systemFont(ofSize: 12, weight: .semibold)
+        ]
 
         let nor = tab.stackedLayoutAppearance.normal
-        nor.iconColor = lightGray
-        nor.titleTextAttributes = [.foregroundColor: lightGray]
+        nor.iconColor = secondary
+        nor.titleTextAttributes = [
+            .foregroundColor: secondary,
+            .font: UIFont.systemFont(ofSize: 12, weight: .medium)
+        ]
 
         UITabBar.appearance().standardAppearance   = tab
         UITabBar.appearance().scrollEdgeAppearance = tab
@@ -68,10 +74,19 @@ private extension SponUp2App {
     func configureNavBarAppearance() {
         let nav = UINavigationBarAppearance()
         nav.configureWithTransparentBackground()
+        nav.titleTextAttributes = [
+            .foregroundColor: UIColor(AppColors.textPrimary),
+            .font: UIFont.systemFont(ofSize: 17, weight: .semibold, design: .rounded)
+        ]
+        nav.largeTitleTextAttributes = [
+            .foregroundColor: UIColor(AppColors.textPrimary),
+            .font: UIFont.systemFont(ofSize: 34, weight: .bold, design: .rounded)
+        ]
+        
         UINavigationBar.appearance().standardAppearance   = nav
         UINavigationBar.appearance().compactAppearance    = nav
         UINavigationBar.appearance().scrollEdgeAppearance = nav
-        UINavigationBar.appearance().tintColor            = .white
+        UINavigationBar.appearance().tintColor            = UIColor(AppColors.accent)
     }
 
     func handleScenePhaseChange(_ newPhase: ScenePhase) {
