@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import FirebaseFirestore
 import AVFoundation   // for text-to-speech
+import UIKit
 
 struct ChatMessage: Identifiable {
     let id = UUID()

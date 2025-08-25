@@ -1,6 +1,7 @@
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
+import UIKit
 
 // MARK: - Linked Athlete Model
 

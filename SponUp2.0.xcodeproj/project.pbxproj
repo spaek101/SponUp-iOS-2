@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2A6773482E5BA25200B78C05 /* NoEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6773472E5BA25200B78C05 /* NoEvents.swift */; };
+		2A6773492E5BA25200B78C05 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6773462E5BA25200B78C05 /* ContentView.swift */; };
+		2A856EAA2E5BDB8500AAF512 /* NewAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2A856EA92E5BDB8500AAF512 /* NewAssets.xcassets */; };
+		2A856EAF2E5BEE3100AAF512 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A856EAE2E5BEE3100AAF512 /* AppColors.swift */; };
+		2A856EB22E5BEFB600AAF512 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A856EB12E5BEFB600AAF512 /* DesignSystem.swift */; };
+		2A856EB32E5BEFB600AAF512 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A856EB02E5BEFB600AAF512 /* ButtonStyles.swift */; };
 		AB45F53C2E3AA1AD007066F8 /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = AB45F53B2E3AA1AD007066F8 /* FirebaseAI */; };
 		AB45F53E2E3AA1AD007066F8 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = AB45F53D2E3AA1AD007066F8 /* FirebaseAnalytics */; };
 		AB45F5402E3AA1AD007066F8 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AB45F53F2E3AA1AD007066F8 /* FirebaseAuth */; };
@@ -77,6 +83,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2A6773462E5BA25200B78C05 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		2A6773472E5BA25200B78C05 /* NoEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoEvents.swift; sourceTree = "<group>"; };
+		2A856EA92E5BDB8500AAF512 /* NewAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = NewAssets.xcassets; sourceTree = "<group>"; };
+		2A856EAE2E5BEE3100AAF512 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		2A856EB02E5BEFB600AAF512 /* ButtonStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonStyles.swift; sourceTree = "<group>"; };
+		2A856EB12E5BEFB600AAF512 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		ABBDF9022E52528F00D5B5B0 /* SponsoredTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsoredTab.swift; sourceTree = "<group>"; };
 		ABBDF9042E52693000D5B5B0 /* SponsoredChallengesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsoredChallengesViewModel.swift; sourceTree = "<group>"; };
 		ABBDF9082E54D78700D5B5B0 /* TiledBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TiledBackground.swift; sourceTree = "<group>"; };
@@ -178,6 +190,13 @@
 		ABF5CAE22E3403F9000D4E79 = {
 			isa = PBXGroup;
 			children = (
+				ABF5CAEC2E3403F9000D4E79 /* Products */,
+				2A6773462E5BA25200B78C05 /* ContentView.swift */,
+				2A856EA92E5BDB8500AAF512 /* NewAssets.xcassets */,
+				2A6773472E5BA25200B78C05 /* NoEvents.swift */,
+				2A856EB02E5BEFB600AAF512 /* ButtonStyles.swift */,
+				2A856EB12E5BEFB600AAF512 /* DesignSystem.swift */,
+				2A856EAE2E5BEE3100AAF512 /* AppColors.swift */,
 				ABBDF9042E52693000D5B5B0 /* SponsoredChallengesViewModel.swift */,
 				ABD38B8E2E41DB4300CC17BD /* ChaiLauncher.swift */,
 				ABD38B902E41DF3E00CC17BD /* ChatMessage.swift */,
@@ -197,10 +216,6 @@
 				ABF283562E3C887D0057C6E6 /* SponsorProfileView.swift */,
 				ABF5CB4C2E3A002E000D4E79 /* SignInView.swift */,
 				ABF5CB482E39FD62000D4E79 /* SignUpView.swift */,
-				ABF5CAED2E3403F9000D4E79 /* SponUp2.0 */,
-				ABF5CAFE2E3403FC000D4E79 /* SponUp2.0Tests */,
-				ABF5CB082E3403FC000D4E79 /* SponUp2.0UITests */,
-				ABF5CAEC2E3403F9000D4E79 /* Products */,
 				ABF5CB3E2E357255000D4E79 /* AthleteHomeView.swift */,
 				ABBDF90E2E55A2AC00D5B5B0 /* ChallengeLink.swift */,
 				ABBDF9102E56277C00D5B5B0 /* ChallengeLinkDetails.swift */,
@@ -225,6 +240,9 @@
 				ABF5CB282E3404CF000D4E79 /* ChallengeCardView.swift */,
 				ABF5CB2A2E3404D8000D4E79 /* SuggestedChallengesSection.swift */,
 				ABF5CB2C2E3404E1000D4E79 /* ProgressToNextSkinView.swift */,
+				ABF5CAED2E3403F9000D4E79 /* SponUp2.0 */,
+				ABF5CAFE2E3403FC000D4E79 /* SponUp2.0Tests */,
+				ABF5CB082E3403FC000D4E79 /* SponUp2.0UITests */,
 				ABF5CB4E2E3A8A94000D4E79 /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
@@ -369,6 +387,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ABF5CB4F2E3A8A94000D4E79 /* GoogleService-Info.plist in Resources */,
+				2A856EAA2E5BDB8500AAF512 /* NewAssets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -394,8 +413,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				ABF5CB252E3404BE000D4E79 /* LeaderboardStrip.swift in Sources */,
+				2A6773482E5BA25200B78C05 /* NoEvents.swift in Sources */,
+				2A6773492E5BA25200B78C05 /* ContentView.swift in Sources */,
 				ABD38B8F2E41DB4300CC17BD /* ChaiLauncher.swift in Sources */,
 				ABF2835B2E3DEE850057C6E6 /* SponsorAthleteView.swift in Sources */,
+				2A856EAF2E5BEE3100AAF512 /* AppColors.swift in Sources */,
 				ABF5CB1B2E340470000D4E79 /* Models.swift in Sources */,
 				ABF5CB1D2E34047E000D4E79 /* MockData.swift in Sources */,
 				ABBDF90D2E551DFA00D5B5B0 /* SilverCheckeredFoil.swift in Sources */,
@@ -427,6 +449,8 @@
 				ABD38B8B2E412C7B00CC17BD /* YTDSummaryChallenge.swift in Sources */,
 				ABF5CB312E3404F6000D4E79 /* MyChallengesView.swift in Sources */,
 				ABD38B932E449B8B00CC17BD /* ChallengeTitleStore.swift in Sources */,
+				2A856EB22E5BEFB600AAF512 /* DesignSystem.swift in Sources */,
+				2A856EB32E5BEFB600AAF512 /* ButtonStyles.swift in Sources */,
 				ABF5CB332E340502000D4E79 /* WalletView.swift in Sources */,
 				ABBDF9132E57753800D5B5B0 /* ViewLeaderboard.swift in Sources */,
 				ABD38B912E41DF3E00CC17BD /* ChatMessage.swift in Sources */,
@@ -596,6 +620,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"SponUp2.0/Preview Content\"";
+				DEVELOPMENT_TEAM = ZZ46FW6VXS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need your microphone so you can speak commands to Chai.";
@@ -626,6 +651,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"SponUp2.0/Preview Content\"";
+				DEVELOPMENT_TEAM = ZZ46FW6VXS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need your microphone so you can speak commands to Chai.";

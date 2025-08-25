@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Modern Design System for SponUp
 /// A comprehensive design system following Apple's latest guidelines

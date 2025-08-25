@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ViewLeaderboard: View {
     // change this to your actual asset name

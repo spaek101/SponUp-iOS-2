@@ -9,6 +9,7 @@ import SwiftUI
 import FirebaseCore
 import FirebaseAuth
 import FirebaseFirestore
+import UIKit
 
 @main
 struct SponUp2App: App {
@@ -76,11 +77,11 @@ private extension SponUp2App {
         nav.configureWithTransparentBackground()
         nav.titleTextAttributes = [
             .foregroundColor: UIColor(AppColors.textPrimary),
-            .font: UIFont.systemFont(ofSize: 17, weight: .semibold, design: .rounded)
+            .font: UIFont.systemFont(ofSize: 17, weight: .semibold)
         ]
         nav.largeTitleTextAttributes = [
             .foregroundColor: UIColor(AppColors.textPrimary),
-            .font: UIFont.systemFont(ofSize: 34, weight: .bold, design: .rounded)
+            .font: UIFont.systemFont(ofSize: 34, weight: .bold)
         ]
         
         UINavigationBar.appearance().standardAppearance   = nav

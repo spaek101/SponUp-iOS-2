@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ChallengeCardView: View {
     let challenge: Challenge
@@ -239,35 +240,7 @@ struct ChallengeCardView: View {
 }
 
 // MARK: - Button Style Wrapper
-struct AnyButtonStyle: ButtonStyle {
-    private let _makeBody: (Configuration) -> AnyView
-    
-    init<S: ButtonStyle>(_ style: S) {
-        _makeBody = { configuration in
-            AnyView(style.makeBody(configuration: configuration))
-        }
-    }
-    
-    func makeBody(configuration: Configuration) -> some View {
-        _makeBody(configuration)
-    }
-}
-
-// MARK: - Disabled Button Style
-struct DisabledButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(AppTypography.headline)
-            .foregroundColor(.white)
-            .padding(.horizontal, AppSpacing.lg)
-            .padding(.vertical, AppSpacing.md)
-            .background(
-                RoundedRectangle(cornerRadius: AppCornerRadius.medium)
-                    .fill(AppColors.textSecondary)
-            )
-            .opacity(0.6)
-    }
-}
+// Note: AnyButtonStyle and DisabledButtonStyle are defined in ButtonStyles.swift
 
 // MARK: - Corner Radius Extension (keeping for compatibility)
 extension View {

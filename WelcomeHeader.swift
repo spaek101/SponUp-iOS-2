@@ -1,5 +1,6 @@
 import SwiftUI
 
+
 struct WelcomeHeader: View {
     enum Kind {
         case athlete(points: Int, cash: Int)
